@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>YT Bilingual</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <h1>YT Bilingual</h1>
+
+    <label class="row switch">
+      <input type="checkbox" id="enabled" />
+      <span>Bật dịch song ngữ</span>
+    </label>
+
+    <section>
+      <label for="apiKey">Claude API key</label>
+      <div class="inline">
+        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+        <button id="toggleKey" type="button" title="Hiện/ẩn">👁</button>
+      </div>
+      <div class="inline">
+        <button id="saveKey" type="button">Lưu key</button>
+        <button id="testKey" type="button" class="secondary">Kiểm tra</button>
+      </div>
+      <p id="keyStatus" class="status"></p>
+      <p class="hint">Key chỉ lưu trong trình duyệt này và chỉ service worker của extension dùng. Lấy key tại platform.claude.com → Khóa API.</p>
+    </section>
+
+    <section>
+      <label for="model">Model</label>
+      <select id="model"></select>
+
+      <label for="targetLang">Dịch sang</label>
+      <select id="targetLang"></select>
+
+      <label for="altTargetLang">Nếu video đã là ngôn ngữ trên, dịch sang</label>
+      <select id="altTargetLang"></select>
+    </section>
+
+    <section>
+      <label for="display">Hiển thị</label>
+      <select id="display"></select>
+
+      <label for="fontScale">Cỡ chữ <span id="fontScaleValue"></span></label>
+      <input type="range" id="fontScale" min="0.7" max="1.6" step="0.1" />
+    </section>
+
+    <section class="usage">
+      <div><span>Tháng này</span><b id="monthUsd">$0</b></div>
+      <div><span>Tổng</span><b id="totalUsd">$0</b></div>
+      <p class="hint">Ước tính theo số token thật API trả về. Số chính xác xem ở platform.claude.com → Usage.</p>
+    </section>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,487 @@
+{
+  "wireMagic": "pb3",
+  "pens": [ {
+  
+  } ],
+  "wsWinStyles": [ {
+  
+  } ],
+  "wpWinPositions": [ {
+  
+  } ],
+  "events": [ {
+    "tStartMs": 240,
+    "dDurationMs": 4960,
+    "segs": [ {
+      "utf8": "So I've been running Parrot OS for a while \nnow, comfortable, know where everything is,  "
+    } ]
+  }, {
+    "tStartMs": 5200,
+    "dDurationMs": 5200,
+    "segs": [ {
+      "utf8": "life is good. Then someone in the Cyberflow \nDiscord drops a message saying \"why aren't  "
+    } ]
+  }, {
+    "tStartMs": 10400,
+    "dDurationMs": 5040,
+    "segs": [ {
+      "utf8": "you using BlackArch\" and I made the mistake of \nlooking it up. Three hours later I'm downloading  "
+    } ]
+  }, {
+    "tStartMs": 15440,
+    "dDurationMs": 6320,
+    "segs": [ {
+      "utf8": "a 20GB ISO at two in the morning like a completely \nnormal person making completely normal decisions."
+    } ]
+  }, {
+    "tStartMs": 21760,
+    "dDurationMs": 5680,
+    "segs": [ {
+      "utf8": "For context I know Kali, I know Parrot, I \nunderstand how security distributions work.  "
+    } ]
+  }, {
+    "tStartMs": 27440,
+    "dDurationMs": 4960,
+    "segs": [ {
+      "utf8": "BlackArch is not the same conversation. \nBlackArch is an Arch Linux based distribution  "
+    } ]
+  }, {
+    "tStartMs": 32400,
+    "dDurationMs": 5440,
+    "segs": [ {
+      "utf8": "with over 2800 security tools in its \nrepository. Not pre-installed. In its  "
+    } ]
+  }, {
+    "tStartMs": 37840,
+    "dDurationMs": 3280,
+    "segs": [ {
+      "utf8": "repository. The difference matters \nand I'll get to that. But the number  "
+    } ]
+  }, {
+    "tStartMs": 41120,
+    "dDurationMs": 3760,
+    "segs": [ {
+      "utf8": "alone should tell you that whoever \nbuilt this was not playing around."
+    } ]
+  }, {
+    "tStartMs": 44880,
+    "dDurationMs": 3200,
+    "segs": [ {
+      "utf8": "The installation is the first thing \nthat separates BlackArch from every  "
+    } ]
+  }, {
+    "tStartMs": 48080,
+    "dDurationMs": 4320,
+    "segs": [ {
+      "utf8": "other security distro I've touched. Kali \nholds your hand through the installer,  "
+    } ]
+  }, {
+    "tStartMs": 52400,
+    "dDurationMs": 4400,
+    "segs": [ {
+      "utf8": "Parrot is friendly, even Arch Linux has \ngotten more approachable over the years.  "
+    } ]
+  }, {
+    "tStartMs": 56800,
+    "dDurationMs": 5600,
+    "segs": [ {
+      "utf8": "BlackArch gives you options a full ISO \nwith a graphical installer, a minimal ISO,  "
+    } ]
+  }, {
+    "tStartMs": 62400,
+    "dDurationMs": 4160,
+    "segs": [ {
+      "utf8": "or my personal favorite option which is \ninstalling it on top of an existing Arch  "
+    } ]
+  }, {
+    "tStartMs": 66560,
+    "dDurationMs": 5440,
+    "segs": [ {
+      "utf8": "system by running a bootstrap script. I go with \nthe full ISO because I'm not completely insane,  "
+    } ]
+  }, {
+    "tStartMs": 72000,
+    "dDurationMs": 4720,
+    "segs": [ {
+      "utf8": "but even that process assumes you know what you're \ndoing. It's asking about partitioning schemes,  "
+    } ]
+  }, {
+    "tStartMs": 76720,
+    "dDurationMs": 5760,
+    "segs": [ {
+      "utf8": "boot loaders, filesystem types. This is not an \nOS that wants to be your first Linux experience.  "
+    } ]
+  }, {
+    "tStartMs": 82480,
+    "dDurationMs": 4640,
+    "segs": [ {
+      "utf8": "It will let you shoot yourself in the foot and \nthen quietly log the timestamp of when you did it."
+    } ]
+  }, {
+    "tStartMs": 87120,
+    "dDurationMs": 4640,
+    "segs": [ {
+      "utf8": "First boot and the default desktop is \nsomething called Openbox. Minimal, fast,  "
+    } ]
+  }, {
+    "tStartMs": 91760,
+    "dDurationMs": 5760,
+    "segs": [ {
+      "utf8": "almost aggressively bare. No dock, no fancy \npanel, no animations, nothing that could be  "
+    } ]
+  }, {
+    "tStartMs": 97520,
+    "dDurationMs": 5360,
+    "segs": [ {
+      "utf8": "accused of wasting a single CPU cycle. Right \nclick on the desktop and a menu appears. That's  "
+    } ]
+  }, {
+    "tStartMs": 102880,
+    "dDurationMs": 5120,
+    "segs": [ {
+      "utf8": "it. That's your interface. Coming from Parrot's \nclean MATE desktop this feels like someone handed  "
+    } ]
+  }, {
+    "tStartMs": 108000,
+    "dDurationMs": 4960,
+    "segs": [ {
+      "utf8": "me a text editor and said good luck. But I \nkeep going because I'm already in too deep."
+    } ]
+  }, {
+    "tStartMs": 112960,
+    "dDurationMs": 5280,
+    "segs": [ {
+      "utf8": "I open a terminal and run `sudo pacman -Syu` \nto update the system first because that's  "
+    } ]
+  }, {
+    "tStartMs": 118240,
+    "dDurationMs": 4800,
+    "segs": [ {
+      "utf8": "just what you do on Arch based systems before \nanything else. Pacman is the package manager  "
+    } ]
+  }, {
+    "tStartMs": 123040,
+    "dDurationMs": 4160,
+    "segs": [ {
+      "utf8": "and if you've never used it, it's faster \nthan apt, cleaner than most alternatives,  "
+    } ]
+  }, {
+    "tStartMs": 127200,
+    "dDurationMs": 3680,
+    "segs": [ {
+      "utf8": "and the commands actually make sense \nonce you spend five minutes with it.  "
+    } ]
+  }, {
+    "tStartMs": 130880,
+    "dDurationMs": 5840,
+    "segs": [ {
+      "utf8": "`pacman -S toolname` installs something. \n`pacman -Rs toolname` removes it cleanly.  "
+    } ]
+  }, {
+    "tStartMs": 136720,
+    "dDurationMs": 5520,
+    "segs": [ {
+      "utf8": "`pacman -Ss keyword` searches the repos. \nThe BlackArch repository sits on top of the  "
+    } ]
+  }, {
+    "tStartMs": 142240,
+    "dDurationMs": 5040,
+    "segs": [ {
+      "utf8": "standard Arch repos which means you have access \nto everything in the official Arch repos plus  "
+    } ]
+  }, {
+    "tStartMs": 147280,
+    "dDurationMs": 4080,
+    "segs": [ {
+      "utf8": "all 2800 BlackArch tools from the same package \nmanager. One consistent system for everything."
+    } ]
+  }, {
+    "tStartMs": 151360,
+    "dDurationMs": 6080,
+    "segs": [ {
+      "utf8": "Now about those 2800 tools. On Kali and Parrot the \ntools are pre-installed and organized in menus by  "
+    } ]
+  }, {
+    "tStartMs": 157440,
+    "dDurationMs": 5840,
+    "segs": [ {
+      "utf8": "category. BlackArch doesn't do that. The tools are \navailable but you install what you actually need. "
+    } ]
+  }, {
+    "tStartMs": 163280,
+    "dDurationMs": 4080,
+    "segs": [ {
+      "utf8": "At first this feels like extra work and \nthen you realize it's actually the smarter  "
+    } ]
+  }, {
+    "tStartMs": 167360,
+    "dDurationMs": 3760,
+    "segs": [ {
+      "utf8": "approach. On Kali you have hundreds \nof tools sitting on your system that  "
+    } ]
+  }, {
+    "tStartMs": 171120,
+    "dDurationMs": 4560,
+    "segs": [ {
+      "utf8": "you've never opened and probably never \nwill. On BlackArch your environment is  "
+    } ]
+  }, {
+    "tStartMs": 175680,
+    "dDurationMs": 5600,
+    "segs": [ {
+      "utf8": "exactly what you put into it. You install Nmap \nbecause you need Nmap. You install Burp Suite  "
+    } ]
+  }, {
+    "tStartMs": 181280,
+    "dDurationMs": 4880,
+    "segs": [ {
+      "utf8": "because you need Burp Suite. The result is a \nleaner, faster system where you actually know  "
+    } ]
+  }, {
+    "tStartMs": 186160,
+    "dDurationMs": 1680,
+    "segs": [ {
+      "utf8": "what's on it and why. For anyone doing serious \nsecurity work that level of control matters."
+    } ]
+  }, {
+    "tStartMs": 187840,
+    "dDurationMs": 3280,
+    "segs": [ {
+      "utf8": "This is also the point where I'll be \nhonest about something. Everything I'm  "
+    } ]
+  }, {
+    "tStartMs": 191120,
+    "dDurationMs": 868,
+    "segs": [ {
+      "utf8": "exploring tonight the tools, the workflows, the \nway professionals actually structure a security  "
+    } ]
+  }, {
+    "tStartMs": 191988,
+    "dDurationMs": 4892,
+    "segs": [ {
+      "utf8": "environment exists in documentation scattered \nacross the Arch Wiki, BlackArch's own docs,  "
+    } ]
+  }, {
+    "tStartMs": 196880,
+    "dDurationMs": 5200,
+    "segs": [ {
+      "utf8": "random blog posts and forum threads. The Arch Wiki \nalone is one of the best technical resources on  "
+    } ]
+  }, {
+    "tStartMs": 202080,
+    "dDurationMs": 4320,
+    "segs": [ {
+      "utf8": "the internet and it's completely free. The \nproblem isn't that the information doesn't  "
+    } ]
+  }, {
+    "tStartMs": 206400,
+    "dDurationMs": 4320,
+    "segs": [ {
+      "utf8": "exist. It's that when you're building something \nlike this from scratch you're constantly jumping  "
+    } ]
+  }, {
+    "tStartMs": 210720,
+    "dDurationMs": 4560,
+    "segs": [ {
+      "utf8": "between fifteen different sources with no \nclear picture of how it all fits together  "
+    } ]
+  }, {
+    "tStartMs": 215280,
+    "dDurationMs": 4240,
+    "segs": [ {
+      "utf8": "and nobody to ask when something breaks in \na way that Google has never seen before.  "
+    } ]
+  }, {
+    "tStartMs": 219520,
+    "dDurationMs": 5680,
+    "segs": [ {
+      "utf8": "That's the exact gap Cyberflow fills the tools, \nthe methodology, the structured path through it,  "
+    } ]
+  }, {
+    "tStartMs": 225200,
+    "dDurationMs": 4640,
+    "segs": [ {
+      "utf8": "and a community of people actively working through \nthe same problems. I'm in there directly when  "
+    } ]
+  }, {
+    "tStartMs": 229840,
+    "dDurationMs": 5865,
+    "segs": [ {
+      "utf8": "you get stuck. Link is in the description, code \nCyberflow50 for fifty percent off. Now back to it."
+    } ]
+  }, {
+    "tStartMs": 235705,
+    "dDurationMs": 98,
+    "segs": [ {
+      "utf8": "I start installing tools selectively and this is \nwhere BlackArch becomes genuinely interesting as  "
+    } ]
+  }, {
+    "tStartMs": 235803,
+    "dDurationMs": 96,
+    "segs": [ {
+      "utf8": "a learning experience. Because choosing what to \ninstall forces you to actually think about what  "
+    } ]
+  }, {
+    "tStartMs": 235899,
+    "dDurationMs": 4421,
+    "segs": [ {
+      "utf8": "you're trying to do. On Parrot you open the menu \nand everything is already there. On BlackArch  "
+    } ]
+  }, {
+    "tStartMs": 240320,
+    "dDurationMs": 5360,
+    "segs": [ {
+      "utf8": "you have to know enough to ask for the right \nthing. I install the tools I know first Nmap,  "
+    } ]
+  }, {
+    "tStartMs": 245680,
+    "dDurationMs": 5440,
+    "segs": [ {
+      "utf8": "Wireshark, Metasploit, Burp Suite and then I \nstart browsing the BlackArch tool list just  "
+    } ]
+  }, {
+    "tStartMs": 251120,
+    "dDurationMs": 4720,
+    "segs": [ {
+      "utf8": "to see what's in there that I've never heard of. \nAnd this is where it gets actually interesting."
+    } ]
+  }, {
+    "tStartMs": 255840,
+    "dDurationMs": 5200,
+    "segs": [ {
+      "utf8": "There are tools in the BlackArch repository that \nI've never seen mentioned anywhere. Specialized  "
+    } ]
+  }, {
+    "tStartMs": 261040,
+    "dDurationMs": 6640,
+    "segs": [ {
+      "utf8": "wireless attack frameworks, obscure but powerful \nOSINT tools, reverse engineering utilities,  "
+    } ]
+  }, {
+    "tStartMs": 267680,
+    "dDurationMs": 5120,
+    "segs": [ {
+      "utf8": "binary analysis tools, network fuzzing \nframeworks. Things that exist in niche  "
+    } ]
+  }, {
+    "tStartMs": 272800,
+    "dDurationMs": 4080,
+    "segs": [ {
+      "utf8": "corners of the security community and \nnever made it into the Kali or Parrot  "
+    } ]
+  }, {
+    "tStartMs": 276880,
+    "dDurationMs": 5520,
+    "segs": [ {
+      "utf8": "default installs. For someone who wants to go \nbeyond the standard toolkit this repository is  "
+    } ]
+  }, {
+    "tStartMs": 282400,
+    "dDurationMs": 5280,
+    "segs": [ {
+      "utf8": "genuinely one of the most valuable things about \nBlackArch. You can spend hours just reading tool  "
+    } ]
+  }, {
+    "tStartMs": 287680,
+    "dDurationMs": 5680,
+    "segs": [ {
+      "utf8": "descriptions and learning that entire categories \nof techniques exist that you never knew about."
+    } ]
+  }, {
+    "tStartMs": 293360,
+    "dDurationMs": 5440,
+    "segs": [ {
+      "utf8": "The performance is noticeably better than every \nother security distro I've run. Lighter on RAM,  "
+    } ]
+  }, {
+    "tStartMs": 298800,
+    "dDurationMs": 5200,
+    "segs": [ {
+      "utf8": "faster to boot, more responsive under \nload. This is the Arch philosophy in action  "
+    } ]
+  }, {
+    "tStartMs": 304000,
+    "dDurationMs": 3760,
+    "segs": [ {
+      "utf8": "nothing runs on your system that \nyou didn't explicitly put there. No  "
+    } ]
+  }, {
+    "tStartMs": 307760,
+    "dDurationMs": 4960,
+    "segs": [ {
+      "utf8": "background services you didn't ask for, \nno default applications eating memory,  "
+    } ]
+  }, {
+    "tStartMs": 312720,
+    "dDurationMs": 5520,
+    "segs": [ {
+      "utf8": "no visual effects consuming GPU resources. \nFor running on older hardware or inside a  "
+    } ]
+  }, {
+    "tStartMs": 318240,
+    "dDurationMs": 4480,
+    "segs": [ {
+      "utf8": "VM with limited resources BlackArch \nis in a completely different class."
+    } ]
+  }, {
+    "tStartMs": 322720,
+    "dDurationMs": 5440,
+    "segs": [ {
+      "utf8": "By the end of the night my honest take is this \nBlackArch is not for everyone and it's not trying  "
+    } ]
+  }, {
+    "tStartMs": 328160,
+    "dDurationMs": 4800,
+    "segs": [ {
+      "utf8": "to be. If you want something ready to go out of \nthe box, Kali or Parrot are the right answer.  "
+    } ]
+  }, {
+    "tStartMs": 332960,
+    "dDurationMs": 4160,
+    "segs": [ {
+      "utf8": "But if you've been using those distributions \nfor a while and you want an environment that  "
+    } ]
+  }, {
+    "tStartMs": 337120,
+    "dDurationMs": 5200,
+    "segs": [ {
+      "utf8": "you built yourself, that runs exactly what \nyou chose to put on it, that forces you to  "
+    } ]
+  }, {
+    "tStartMs": 342320,
+    "dDurationMs": 4720,
+    "segs": [ {
+      "utf8": "actually understand your own toolkit BlackArch \nis the most interesting thing you can do with  "
+    } ]
+  }, {
+    "tStartMs": 347040,
+    "dDurationMs": 4720,
+    "segs": [ {
+      "utf8": "a spare partition. The learning curve is real \nbut what's on the other side of it is worth it."
+    } ]
+  }, {
+    "tStartMs": 351760,
+    "dDurationMs": 4960,
+    "segs": [ {
+      "utf8": "by the way A lot of you reached out after my last \nvideo asking about the setup and the aesthetics  "
+    } ]
+  }, {
+    "tStartMs": 356720,
+    "dDurationMs": 3920,
+    "segs": [ {
+      "utf8": "of my kali linux so I put the dotfiles for \nthis BlackArch build in the first comment  "
+    } ]
+  }, {
+    "tStartMs": 360640,
+    "dDurationMs": 3360,
+    "segs": [ {
+      "utf8": "Grab it, make it yours, and if you \ndo something interesting with it  "
+    } ]
+  }, {
+    "tStartMs": 364000,
+    "dDurationMs": 3680,
+    "segs": [ {
+      "utf8": "drop it in the Discord. I want to see \nwhat you build._ that's it, see ya."
+    } ]
+  } ]
+}
