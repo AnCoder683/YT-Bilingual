@@ -121,8 +121,10 @@ function renderSelBar(): void {
   else text.textContent = all;
   selAll.setAttribute('aria-label', all);
   $('selNone').hidden = $('selDelete').hidden = !n;
-  $('selDeleteLabel').textContent = `Xóa ${n} từ`;
-  $('exportLabel').textContent = n ? `Xuất ${n} từ` : 'Xuất file';
+  // Màn hình hẹp ẩn phần .unit: "Xóa" / "Xuất".
+  $('selDeleteLabel').replaceChildren('Xóa', el('span', 'unit', ` ${n} từ`));
+  if (n) $('exportLabel').replaceChildren('Xuất', el('span', 'unit', ` ${n} từ`));
+  else $('exportLabel').textContent = 'Xuất file';
 }
 
 /** Đã chọn hết các thẻ đang hiện → bỏ chọn chúng; ngược lại chọn hết. */
@@ -155,7 +157,8 @@ browser.storage.onChanged.addListener((changes, area) => {
 // ---------- Hộp xuất file ----------
 
 const btn = $<HTMLButtonElement>('exportBtn');
-const box = $<HTMLElement>('exportBox');
+/** Lớp phủ chứa hộp xuất (hidden = đang đóng). */
+const box = $<HTMLElement>('exportOverlay');
 const fmtSel = $<HTMLSelectElement>('fmt');
 const tpls = $<HTMLElement>('tpls');
 const preview = $<HTMLElement>('preview');
@@ -299,6 +302,8 @@ function openExport(open: boolean): void {
   const wasOpen = box.hidden === false;
   box.hidden = !open;
   btn.setAttribute('aria-expanded', String(open));
+  document.body.classList.toggle('modal-open', open); // trang phía sau không cuộn theo
+  if (!open && wasOpen) btn.focus();
   // Mở hộp khi đang có thẻ chọn thì mặc định xuất các thẻ đó.
   if (open && !wasOpen && selected.size) scopeRadio('selected').checked = true;
   if (open) {
@@ -307,7 +312,7 @@ function openExport(open: boolean): void {
   }
 }
 
-btn.onclick = () => openExport(box.hidden !== false); // hidden có thể là 'until-found'
+btn.onclick = () => openExport(true);
 $('exportClose').onclick = () => openExport(false);
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
@@ -317,8 +322,9 @@ document.addEventListener('keydown', (e) => {
     renderList();
   }
 });
-document.addEventListener('pointerdown', (e) => {
-  if (!box.hidden && !box.contains(e.target as Node) && !btn.contains(e.target as Node)) openExport(false);
+// Bấm vào vùng mờ bên ngoài hộp thì đóng.
+box.addEventListener('pointerdown', (e) => {
+  if (e.target === box) openExport(false);
 });
 
 fmtSel.onchange = () => {

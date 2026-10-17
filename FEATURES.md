@@ -119,7 +119,9 @@ Mở từ popup → **📒 Sổ từ vựng**. Mỗi mục gồm: từ, phiên �
 
 - Tìm trong sổ (theo từ, nghĩa, câu), xóa từng mục bằng nút ✕.
 - **Chọn nhiều thẻ** bằng ô vuông bên trái mỗi từ; giữ **Shift** khi bấm để chọn cả dải. Hàng **☐ Chọn tất cả** ở trên danh sách (khi đang tìm thì chọn hết kết quả); đã chọn thì hiện `Đã chọn N / M từ`, **Bỏ chọn** và **Xóa N từ**. Xóa cả sổ = Chọn tất cả → Xóa. `Esc` bỏ chọn. Thẻ đã chọn vẫn giữ khi đổi ô tìm kiếm.
+- **Thanh trên cùng đứng yên khi cuộn**: tiêu đề, ô tìm và hàng thao tác `☐ Chọn tất cả · Bỏ chọn … 🗑 Xóa N từ · ⬇ Xuất`. Chọn thẻ ở cuối danh sách vẫn bấm Xóa / Xuất được ngay.
 - Nút **Xuất file** đổi thành **Xuất N từ** khi đang chọn thẻ, và mở hộp xuất với phạm vi là các thẻ đó.
+- **Hộp xuất nổi giữa màn hình**, nền phía sau tối và mờ; đầu hộp và hàng `Tên file · Chép · Tải xuống` luôn hiện, chỉ phần tùy chọn và xem trước tự cuộn. Đóng bằng ✕, `Esc` hoặc bấm ra ngoài.
 - Cùng một từ trong cùng một câu chỉ lưu một lần.
 - Sổ nằm trong trình duyệt (`chrome.storage.local`), cập nhật ngay khi bạn lưu từ ở tab YouTube.
 

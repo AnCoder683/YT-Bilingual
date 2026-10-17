@@ -7,74 +7,72 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <header>
-      <h1>Sổ từ vựng <span id="count"></span></h1>
-      <div class="tools">
-        <input type="search" id="search" placeholder="Tìm từ, nghĩa, câu…" spellcheck="false" />
-        <div class="export-wrap">
+    <div class="topbar">
+      <div class="topbar-in">
+        <header>
+          <h1>Sổ từ vựng <span id="count"></span></h1>
+          <input type="search" id="search" placeholder="Tìm từ, nghĩa, câu…" spellcheck="false" aria-label="Tìm trong sổ" />
+        </header>
+        <div id="selBar" class="selbar" hidden>
+          <label class="sel-all"><input type="checkbox" id="selAll" /> <span id="selText">Chọn tất cả</span></label>
+          <button id="selNone" type="button" class="link" hidden>Bỏ chọn</button>
+          <span class="spacer"></span>
+          <button id="selDelete" type="button" class="danger" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="M6 7l1 13h10l1-13"></path></svg>
+            <span id="selDeleteLabel">Xóa</span>
+          </button>
           <button id="exportBtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="exportBox">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
             <span id="exportLabel">Xuất file</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
           </button>
-
-          <section id="exportBox" class="export" role="dialog" aria-labelledby="exportTitle" hidden>
-            <div class="ex-head">
-              <h2 id="exportTitle">Xuất sổ từ vựng</h2>
-              <button id="exportClose" type="button" class="icon" aria-label="Đóng">✕</button>
-            </div>
-            <div class="ex-body">
-              <div class="ex-side">
-                <div class="ex-group">
-                  <label class="ex-label" for="fmt">Định dạng file</label>
-                  <select id="fmt"></select>
-                  <p id="fmtDesc" class="hint"></p>
-                </div>
-                <div class="ex-group">
-                  <div class="ex-label" id="tplLabel">Mẫu</div>
-                  <div id="tpls" class="tpls" role="radiogroup" aria-labelledby="tplLabel"></div>
-                </div>
-                <fieldset class="ex-group">
-                  <legend class="ex-label">Kèm theo</legend>
-                  <label class="check"><input type="checkbox" id="optPhonetics" /> Phiên âm và loại từ</label>
-                  <label class="check"><input type="checkbox" id="optExamples" /> Câu ví dụ và bản dịch</label>
-                  <label class="check"><input type="checkbox" id="optLinks" /> Link video (mốc thời gian)</label>
-                  <p id="optNote" class="hint" hidden>CSV luôn có đủ các cột.</p>
-                </fieldset>
-                <fieldset class="ex-group">
-                  <legend class="ex-label">Phạm vi</legend>
-                  <label class="check"><input type="radio" name="scope" value="all" checked /> <span id="scopeAll">Cả sổ</span></label>
-                  <label class="check"><input type="radio" name="scope" value="selected" /> <span id="scopeSelected">Các thẻ đang chọn</span></label>
-                </fieldset>
-              </div>
-              <div class="ex-main">
-                <div class="ex-row">
-                  <div class="ex-label">Xem trước</div>
-                  <div id="pvHint" class="hint"></div>
-                </div>
-                <div id="preview" class="preview"></div>
-                <div class="ex-row ex-foot">
-                  <div class="hint">Tên file: <code id="fname"></code></div>
-                  <div class="ex-actions">
-                    <button id="copyBtn" type="button" class="secondary" hidden>Chép</button>
-                    <button id="downloadBtn" type="button">Tải xuống</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
-    </header>
+    </div>
 
-    <div id="selBar" class="selbar" hidden>
-      <label class="sel-all"><input type="checkbox" id="selAll" /> <span id="selText">Chọn tất cả</span></label>
-      <button id="selNone" type="button" class="secondary" hidden>Bỏ chọn</button>
-      <span class="spacer"></span>
-      <button id="selDelete" type="button" class="danger" hidden>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="M6 7l1 13h10l1-13"></path></svg>
-        <span id="selDeleteLabel">Xóa</span>
-      </button>
+    <div id="exportOverlay" class="overlay" hidden>
+      <section id="exportBox" class="export" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+        <div class="ex-head">
+          <h2 id="exportTitle">Xuất sổ từ vựng</h2>
+          <button id="exportClose" type="button" class="icon" aria-label="Đóng">✕</button>
+        </div>
+        <div class="ex-body">
+          <div class="ex-side">
+            <div class="ex-group">
+              <label class="ex-label" for="fmt">Định dạng file</label>
+              <select id="fmt"></select>
+              <p id="fmtDesc" class="hint"></p>
+            </div>
+            <div class="ex-group">
+              <div class="ex-label" id="tplLabel">Mẫu</div>
+              <div id="tpls" class="tpls" role="radiogroup" aria-labelledby="tplLabel"></div>
+            </div>
+            <fieldset class="ex-group">
+              <legend class="ex-label">Kèm theo</legend>
+              <label class="check"><input type="checkbox" id="optPhonetics" /> Phiên âm và loại từ</label>
+              <label class="check"><input type="checkbox" id="optExamples" /> Câu ví dụ và bản dịch</label>
+              <label class="check"><input type="checkbox" id="optLinks" /> Link video (mốc thời gian)</label>
+              <p id="optNote" class="hint" hidden>CSV luôn có đủ các cột.</p>
+            </fieldset>
+            <fieldset class="ex-group">
+              <legend class="ex-label">Phạm vi</legend>
+              <label class="check"><input type="radio" name="scope" value="all" checked /> <span id="scopeAll">Cả sổ</span></label>
+              <label class="check"><input type="radio" name="scope" value="selected" /> <span id="scopeSelected">Các thẻ đang chọn</span></label>
+            </fieldset>
+          </div>
+          <div class="ex-main">
+            <div class="ex-row">
+              <div class="ex-label">Xem trước</div>
+              <div id="pvHint" class="hint"></div>
+            </div>
+            <div id="preview" class="preview"></div>
+          </div>
+        </div>
+        <div class="ex-foot">
+          <div class="hint grow">Tên file: <code id="fname"></code></div>
+          <button id="copyBtn" type="button" class="secondary" hidden>Chép</button>
+          <button id="downloadBtn" type="button">Tải xuống</button>
+        </div>
+      </section>
     </div>
 
     <main id="list"></main>
