@@ -1,5 +1,7 @@
 // Message giữa content script / popup và service worker.
 
+import type { CacheStats } from './translate/cache';
+
 /** Mục glossary tích lũy qua các đoạn: tên riêng, nhân vật, thuật ngữ. */
 export interface GlossaryEntry {
   term: string;
@@ -104,7 +106,19 @@ export interface TestKeyRequest {
 
 export type TestKeyResponse = { ok: true } | { ok: false; error: ErrorKind; message: string };
 
-export type BackgroundRequest = TranslateRequest | TestKeyRequest | LookupRequest;
+/** Popup: xem dung lượng cache (dọn bản ghi quá hạn trước khi đếm). */
+export interface StorageStatsRequest {
+  type: 'storage_stats';
+}
+
+/** Popup: xóa toàn bộ cache bản dịch và tra từ (không đụng sổ từ vựng). */
+export interface StorageClearRequest {
+  type: 'storage_clear';
+}
+
+export type StorageResponse = { ok: true; stats: CacheStats; pruned: number } | { ok: false; error: ErrorKind; message: string };
+
+export type BackgroundRequest = TranslateRequest | TestKeyRequest | LookupRequest | StorageStatsRequest | StorageClearRequest;
 
 export async function sendToBackground<R>(msg: BackgroundRequest): Promise<R> {
   return (await browser.runtime.sendMessage(msg)) as R;

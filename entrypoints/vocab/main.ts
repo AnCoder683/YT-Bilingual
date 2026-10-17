@@ -1,7 +1,7 @@
 import { DEFAULT_OPTIONS, fileName, findFormat, findTemplate, FORMATS, render, type ExportOptions, type ExportOutput } from '@/src/export';
 import { blocksToHtml, sheetHtml } from '@/src/export/html';
 import { sheetNames } from '@/src/export/xlsx';
-import { clearVocab, fmtTime, loadVocab, removeVocab, videoLink, type VocabEntry } from '@/src/vocab';
+import { fmtTime, loadVocab, removeVocab, videoLink, type VocabEntry } from '@/src/vocab';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const list = $<HTMLElement>('list');
@@ -9,6 +9,10 @@ const search = $<HTMLInputElement>('search');
 const empty = $<HTMLParagraphElement>('empty');
 
 let entries: VocabEntry[] = [];
+/** Id các thẻ đang chọn (giữ nguyên khi đổi ô tìm kiếm). */
+const selected = new Set<string>();
+/** Thẻ vừa bấm chọn, để Shift+bấm chọn cả dải. */
+let anchorId: string | null = null;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -27,8 +31,15 @@ function sentence(e: VocabEntry): HTMLElement {
 }
 
 function item(e: VocabEntry): HTMLElement {
-  const box = el('article', 'item');
+  const box = el('article', selected.has(e.id) ? 'item selected' : 'item');
   const head = el('div');
+  const pick = el('div', 'pick');
+  const cb = el('input');
+  cb.type = 'checkbox';
+  cb.checked = selected.has(e.id);
+  cb.setAttribute('aria-label', `Chọn “${e.term}”`);
+  cb.onclick = (ev) => toggle(e.id, cb.checked, ev.shiftKey);
+  pick.append(cb);
   head.append(el('span', 'term', e.term), el('span', 'meta', [e.ipa, e.pos].filter(Boolean).join(' · ')));
   const link = el('a', undefined, `▶ ${fmtTime(e.tMs)} · ${e.title || 'YouTube'}`);
   link.href = videoLink(e);
@@ -39,15 +50,19 @@ function item(e: VocabEntry): HTMLElement {
   const del = el('button', 'del', '✕');
   del.type = 'button';
   del.title = 'Xóa khỏi sổ';
+  del.setAttribute('aria-label', `Xóa “${e.term}”`);
   del.onclick = async () => {
     await removeVocab(e.id);
+    selected.delete(e.id);
     await refresh();
   };
-  box.append(head, el('div', 'meaning', e.meaning), el('div', 'def', e.definition));
-  if (e.note) box.append(el('div', 'note', e.note));
-  box.append(sentence(e));
-  if (e.translation) box.append(el('div', 'translation', e.translation));
-  box.append(src, del);
+  const body = el('div', 'body');
+  body.append(head, el('div', 'meaning', e.meaning), el('div', 'def', e.definition));
+  if (e.note) body.append(el('div', 'note', e.note));
+  body.append(sentence(e));
+  if (e.translation) body.append(el('div', 'translation', e.translation));
+  body.append(src);
+  box.append(pick, body, del);
   return box;
 }
 
@@ -63,21 +78,74 @@ function renderList(): void {
   $('count').textContent = `(${entries.length})`;
   list.replaceChildren(...filtered().map(item));
   empty.hidden = entries.length > 0;
+  renderSelBar();
   if (!box.hidden) updateExport();
 }
 
 async function refresh(): Promise<void> {
   entries = await loadVocab();
+  const ids = new Set(entries.map((e) => e.id));
+  for (const id of selected) if (!ids.has(id)) selected.delete(id);
   renderList();
 }
 
-search.oninput = renderList;
+// ---------- Chọn thẻ ----------
 
-$('clear').onclick = async () => {
-  if (!entries.length || !confirm(`Xóa cả ${entries.length} từ trong sổ?`)) return;
-  await clearVocab();
+/** Bấm ô chọn; Shift+bấm chọn (hoặc bỏ chọn) cả dải từ thẻ bấm trước đó. */
+function toggle(id: string, on: boolean, range: boolean): void {
+  const shown = filtered().map((e) => e.id);
+  const a = anchorId ? shown.indexOf(anchorId) : -1;
+  const b = shown.indexOf(id);
+  const ids = range && a >= 0 && b >= 0 ? shown.slice(Math.min(a, b), Math.max(a, b) + 1) : [id];
+  for (const x of ids) on ? selected.add(x) : selected.delete(x);
+  anchorId = id;
+  renderList();
+}
+
+const selBar = $<HTMLElement>('selBar');
+const selAll = $<HTMLInputElement>('selAll');
+
+/** Thanh chọn luôn hiện (trừ khi sổ trống); có thẻ chọn thì hiện Bỏ chọn / Xóa. */
+function renderSelBar(): void {
+  const n = selected.size;
+  const shown = filtered();
+  const onShown = shown.filter((e) => selected.has(e.id)).length;
+  selBar.hidden = entries.length === 0;
+  selBar.classList.toggle('active', n > 0);
+  selAll.checked = shown.length > 0 && onShown === shown.length;
+  selAll.indeterminate = onShown > 0 && onShown < shown.length;
+  selAll.disabled = shown.length === 0;
+  const all = search.value.trim() ? 'Chọn hết kết quả' : 'Chọn tất cả';
+  const text = $('selText');
+  if (n) text.replaceChildren(el('span', 'unit', 'Đã chọn '), `${n} / ${entries.length}`, el('span', 'unit', ' từ'));
+  else text.textContent = all;
+  selAll.setAttribute('aria-label', all);
+  $('selNone').hidden = $('selDelete').hidden = !n;
+  $('selDeleteLabel').textContent = `Xóa ${n} từ`;
+  $('exportLabel').textContent = n ? `Xuất ${n} từ` : 'Xuất file';
+}
+
+/** Đã chọn hết các thẻ đang hiện → bỏ chọn chúng; ngược lại chọn hết. */
+selAll.onchange = () => {
+  const shown = filtered();
+  const allOn = shown.every((e) => selected.has(e.id));
+  for (const e of shown) allOn ? selected.delete(e.id) : selected.add(e.id);
+  renderList();
+};
+$('selNone').onclick = () => {
+  selected.clear();
+  renderList();
+};
+$('selDelete').onclick = async () => {
+  const n = selected.size;
+  if (!n || !confirm(`Xóa ${n} từ đã chọn khỏi sổ?`)) return;
+  await removeVocab([...selected]);
+  selected.clear();
   await refresh();
 };
+
+search.oninput = renderList;
+
 
 // Lưu từ ở tab YouTube khác thì trang này cập nhật luôn.
 browser.storage.onChanged.addListener((changes, area) => {
@@ -111,9 +179,11 @@ function savePrefs(): void {
   void browser.storage.local.set({ [PREFS]: prefs });
 }
 
+const scopeRadio = (v: 'all' | 'selected') => document.querySelector<HTMLInputElement>(`input[name="scope"][value="${v}"]`)!;
+
+/** Các mục sẽ xuất, giữ thứ tự trong sổ. */
 function scoped(): VocabEntry[] {
-  const v = document.querySelector<HTMLInputElement>('input[name="scope"]:checked')?.value;
-  return v === 'filtered' ? filtered() : entries;
+  return scopeRadio('selected').checked ? entries.filter((e) => selected.has(e.id)) : entries;
 }
 
 function current() {
@@ -209,11 +279,11 @@ function updateExport(): void {
   }
   $('optNote').hidden = !format.fixedColumns;
   $('scopeAll').textContent = `Cả sổ (${entries.length} từ)`;
-  const q = search.value.trim();
-  const fr = document.querySelector<HTMLInputElement>('input[name="scope"][value="filtered"]')!;
-  fr.disabled = !q;
-  if (!q && fr.checked) document.querySelector<HTMLInputElement>('input[name="scope"][value="all"]')!.checked = true;
-  $('scopeFiltered').textContent = q ? `Kết quả đang tìm (${filtered().length} từ)` : 'Kết quả đang tìm (chưa tìm gì)';
+  const n = selected.size;
+  const sel = scopeRadio('selected');
+  sel.disabled = !n;
+  if (!n && sel.checked) scopeRadio('all').checked = true;
+  $('scopeSelected').textContent = n ? `Các thẻ đang chọn (${n} từ)` : 'Các thẻ đang chọn (chưa chọn thẻ nào)';
 
   lastOut = template.build(scoped(), prefs.options);
   renderPreview(lastOut);
@@ -226,8 +296,11 @@ function updateExport(): void {
 }
 
 function openExport(open: boolean): void {
+  const wasOpen = box.hidden === false;
   box.hidden = !open;
   btn.setAttribute('aria-expanded', String(open));
+  // Mở hộp khi đang có thẻ chọn thì mặc định xuất các thẻ đó.
+  if (open && !wasOpen && selected.size) scopeRadio('selected').checked = true;
   if (open) {
     updateExport();
     fmtSel.focus();
@@ -237,7 +310,12 @@ function openExport(open: boolean): void {
 btn.onclick = () => openExport(box.hidden !== false); // hidden có thể là 'until-found'
 $('exportClose').onclick = () => openExport(false);
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !box.hidden) openExport(false);
+  if (e.key !== 'Escape') return;
+  if (!box.hidden) openExport(false);
+  else if (selected.size) {
+    selected.clear();
+    renderList();
+  }
 });
 document.addEventListener('pointerdown', (e) => {
   if (!box.hidden && !box.contains(e.target as Node) && !btn.contains(e.target as Node)) openExport(false);

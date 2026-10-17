@@ -70,7 +70,7 @@ Bảng toàn bộ câu gốc + bản dịch, tự cuộn theo video, tự đặt
 - **＋ Lưu vào sổ** để lưu từ cùng câu gốc, bản dịch và mốc thời gian trong video. **↺ Nghe lại câu** để tua về đầu câu.
 - Đóng ô bằng `Esc`, nút ✕ hoặc bấm ra ngoài: video tự phát tiếp nếu chính extension đã dừng nó.
 - Mỗi lần tra tốn khoảng $0,0001 với Haiku; tra lại cùng chữ trong cùng câu lấy từ cache.
-- Popup → **📒 Sổ từ vựng** để xem, tìm, xóa, bấm để mở đúng chỗ trong video.
+- Popup → **📒 Sổ từ vựng** để xem, tìm, chọn nhiều thẻ để xóa hoặc xuất, bấm để mở đúng chỗ trong video.
 - Nút **Xuất file ▾** trong sổ: chọn định dạng và mẫu, xem trước rồi tải về.
 
   | Định dạng | Mẫu |
@@ -114,7 +114,7 @@ Sau đó vào trang extensions và bấm **↻** ở YT Bilingual. Key và cache
 
 - API key chỉ lưu trong `chrome.storage.local` của trình duyệt và chỉ service worker của extension dùng; trang YouTube không đọc được. Đừng chia sẻ key. Lỡ lộ thì xóa key trên Console và tạo key mới.
 - Extension chỉ gửi nội dung phụ đề (kèm tiêu đề video) tới `api.anthropic.com` để dịch.
-- Cache bản dịch lưu trong IndexedDB `yt-bilingual` của service worker. Muốn xem hoặc xóa: vào trang extensions, bấm link **service worker** → DevTools → Application → IndexedDB.
+- Cache bản dịch và tra từ lưu trong IndexedDB `yt-bilingual` của service worker. Xem dung lượng, xóa, hoặc chọn thời hạn tự xóa (mặc định 90 ngày không mở) ở mục **Bộ nhớ** trong popup.
 
 ## Phát triển
 

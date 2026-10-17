@@ -36,8 +36,10 @@ export async function addVocab(e: Omit<VocabEntry, 'id' | 'addedAt'>): Promise<V
   return entry;
 }
 
-export async function removeVocab(id: string): Promise<void> {
-  await browser.storage.local.set({ [KEY]: (await loadVocab()).filter((x) => x.id !== id) });
+/** Xóa một hoặc nhiều mục theo id. */
+export async function removeVocab(ids: string | readonly string[]): Promise<void> {
+  const drop = new Set(typeof ids === 'string' ? [ids] : ids);
+  await browser.storage.local.set({ [KEY]: (await loadVocab()).filter((x) => !drop.has(x.id)) });
 }
 
 export async function clearVocab(): Promise<void> {

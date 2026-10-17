@@ -49,6 +49,8 @@ export interface Settings {
   panel: boolean;
   /** Chi tối đa mỗi tháng (USD, theo ước tính trong popup); 0 = không giới hạn. */
   monthlyBudgetUsd: number;
+  /** Tự xóa bản dịch / tra từ đã lưu nếu không dùng quá số ngày này; 0 = giữ mãi. */
+  cacheDays: number;
 }
 
 export type DisplayMode = 'both' | 'target' | 'source';
@@ -70,7 +72,16 @@ export const DEFAULT_SETTINGS: Settings = {
   autoPause: false,
   panel: true,
   monthlyBudgetUsd: 0,
+  cacheDays: 90,
 };
+
+export const CACHE_DAYS: readonly { value: number; label: string }[] = [
+  { value: 30, label: 'Sau 30 ngày không mở' },
+  { value: 90, label: 'Sau 90 ngày không mở' },
+  { value: 180, label: 'Sau 180 ngày không mở' },
+  { value: 365, label: 'Sau 1 năm không mở' },
+  { value: 0, label: 'Không bao giờ' },
+];
 
 /** Đổi các trường này thì phải dịch lại; các trường khác chỉ đổi cách hiển thị. */
 export function needsRetranslate(a: Settings, b: Settings): boolean {

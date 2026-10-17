@@ -75,4 +75,11 @@ describe('sổ từ vựng', () => {
     await removeVocab(list[0]!.id);
     expect((await loadVocab()).map((e) => e.term)).toEqual(['really']);
   });
+
+  it('xóa nhiều mục một lần', async () => {
+    for (const w of ['a', 'b', 'c', 'd']) await addVocab(entry({ term: w, picked: w }));
+    const ids = (await loadVocab()).filter((e) => e.term === 'b' || e.term === 'd').map((e) => e.id);
+    await removeVocab(ids);
+    expect((await loadVocab()).map((e) => e.term)).toEqual(['c', 'a']);
+  });
 });

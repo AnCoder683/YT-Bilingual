@@ -60,7 +60,10 @@ Mỗi lần dịch, extension gửi cho Claude một **đoạn khoảng 120–18
 - Mọi bản dịch được lưu trong trình duyệt (IndexedDB của extension).
 - Xem lại, tua lại hay mở lại video hôm sau đều lấy từ cache: **hiện tức thì và không tốn tiền**.
 - Cache tách theo track phụ đề, ngôn ngữ đích và model. Đổi model là có bản dịch mới, đổi lại model cũ thì bản cũ vẫn còn.
-- Xem hoặc xóa cache: `brave://extensions` → YT Bilingual → **service worker** → DevTools → Application → IndexedDB → `yt-bilingual`.
+- Mục **Bộ nhớ** trong popup cho biết dung lượng: bản dịch đã lưu (số video, MB), tra từ đã lưu, và sổ từ vựng so với giới hạn 10 MB của trình duyệt. Từ 80% thanh sẽ đỏ và gợi ý xuất sổ ra file.
+- **Tự xóa** bản dịch và kết quả tra từ của video không mở lại sau 30 / 90 (mặc định) / 180 / 365 ngày, hoặc giữ mãi. Mở lại video là tính lại từ đầu. Việc dọn chạy tối đa mỗi ngày một lần và mỗi khi mở popup.
+- Nút **Xóa bản dịch & tra từ đã lưu** (bấm hai lần để xác nhận) xóa toàn bộ cache. Sổ từ vựng và API key không bị đụng tới.
+- Ước lượng: khoảng 0,3 MB mỗi giờ video, 0,5 KB mỗi lần tra từ, 1 KB mỗi từ trong sổ.
 
 ## 5. Bảng transcript song ngữ
 
@@ -114,7 +117,9 @@ Bảng chứa toàn bộ câu của video, mỗi câu có bản gốc và bản 
 
 Mở từ popup → **📒 Sổ từ vựng**. Mỗi mục gồm: từ, phiên âm, loại từ, nghĩa, định nghĩa, câu gốc (chữ đã chọn in đậm), bản dịch câu, và link **▶ mm:ss** mở đúng chỗ trong video.
 
-- Tìm trong sổ (theo từ, nghĩa, câu), xóa từng mục hoặc xóa tất cả.
+- Tìm trong sổ (theo từ, nghĩa, câu), xóa từng mục bằng nút ✕.
+- **Chọn nhiều thẻ** bằng ô vuông bên trái mỗi từ; giữ **Shift** khi bấm để chọn cả dải. Hàng **☐ Chọn tất cả** ở trên danh sách (khi đang tìm thì chọn hết kết quả); đã chọn thì hiện `Đã chọn N / M từ`, **Bỏ chọn** và **Xóa N từ**. Xóa cả sổ = Chọn tất cả → Xóa. `Esc` bỏ chọn. Thẻ đã chọn vẫn giữ khi đổi ô tìm kiếm.
+- Nút **Xuất file** đổi thành **Xuất N từ** khi đang chọn thẻ, và mở hộp xuất với phạm vi là các thẻ đó.
 - Cùng một từ trong cùng một câu chỉ lưu một lần.
 - Sổ nằm trong trình duyệt (`chrome.storage.local`), cập nhật ngay khi bạn lưu từ ở tab YouTube.
 
@@ -124,7 +129,7 @@ Trong sổ từ vựng, bấm **Xuất file ▾**. Hộp xuất gồm:
 
 - **Định dạng file** (danh sách thả xuống) và **Mẫu** của định dạng đó; mẫu nên dùng có nhãn *Nên dùng*.
 - **Kèm theo**: phiên âm và loại từ, câu ví dụ và bản dịch, link video (mốc thời gian).
-- **Phạm vi**: cả sổ, hoặc chỉ các từ đang hiện theo ô tìm kiếm.
+- **Phạm vi**: cả sổ, hoặc **các thẻ đang chọn** (tự chọn sẵn khi đang có thẻ được chọn).
 - **Xem trước** đúng nội dung sẽ xuất, đổi ngay khi bạn đổi lựa chọn; tên file; nút **Tải xuống** (và **Chép** với các định dạng văn bản).
 - Lựa chọn lần trước được nhớ lại.
 
@@ -172,19 +177,20 @@ Dành cho luyện nghe:
 
 ## 9. Cài đặt trong popup
 
-| Mục | Ý nghĩa |
-|---|---|
-| Bật dịch song ngữ | Tắt thì vẫn hiện câu gốc đã chia câu, không gọi API |
-| Claude API key | Lưu key, nút **Kiểm tra** (miễn phí, không tốn token) |
-| Model | Haiku / Sonnet / Opus 5.5 |
-| Dịch sang / ngôn ngữ phụ | Ngôn ngữ đích chính, và ngôn ngữ dùng khi video đã ở ngôn ngữ chính |
-| Hiển thị | Song ngữ / chỉ bản dịch / chỉ bản gốc |
-| Cỡ chữ | 70% – 160% |
-| Bảng transcript cạnh video | Bật/tắt bảng |
-| Phím tắt theo câu | Bật/tắt `A` `D` `S` `Q` |
-| Tự dừng sau mỗi câu | Chế độ luyện nghe |
-| Giới hạn mỗi tháng | Ngân sách USD |
-| 📒 Sổ từ vựng | Mở trang sổ từ vựng (xem, tìm, xóa, xuất file) |
+Popup gọn, không phải cuộn:
+
+- **Đầu popup**: công tắc **Bật dịch song ngữ** (tắt thì vẫn hiện câu gốc đã chia câu, không gọi API) và dòng trạng thái (báo đỏ khi chưa có API key).
+- **Hai ô lớn**: **Sổ từ vựng** (số từ, bấm để mở trang sổ) và **Tháng này** (chi phí, có thanh ngân sách nếu đặt giới hạn; bấm để mở mục Chi phí).
+- **Sáu mục gập/mở**, mỗi lúc mở một mục. Bên phải mỗi mục có tóm tắt nên không cần mở cũng biết đang cài gì. Popup nhớ mục bạn mở lần trước; chưa có key thì tự mở mục API key.
+
+| Mục | Tóm tắt (ví dụ) | Bên trong |
+|---|---|---|
+| Dịch | `Haiku 5.5 → Tiếng Việt` | Model; dịch sang; "Video tiếng Việt thì dịch sang" (ngôn ngữ dùng khi video đã ở ngôn ngữ chính; đặt trùng ô trên để không dịch những video đó) |
+| Hiển thị | `Song ngữ · 100%` | Song ngữ / Chỉ bản dịch / Chỉ bản gốc; cỡ chữ 70% – 160% |
+| Học | `Bảng · Phím tắt` | Công tắc: bảng transcript, phím tắt `A` `D` `S` `Q`, tự dừng sau mỗi câu |
+| Chi phí | `Không giới hạn` / `$0.40 / $2` | Tháng này, tổng, giới hạn mỗi tháng |
+| Bộ nhớ | `3 KB` | Dung lượng, tự xóa video không mở sau N ngày, xóa cache |
+| API key | `✓ …abcd` / `Chưa có key` | Lưu key, **Kiểm tra** (miễn phí, không tốn token) |
 
 Thay đổi có hiệu lực ngay, không cần tải lại trang. Đổi model, ngôn ngữ hay key thì dịch lại; đổi cách hiển thị thì giữ bản dịch đã có.
 

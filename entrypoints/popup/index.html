@@ -6,78 +6,123 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <h1>YT Bilingual</h1>
-
-    <label class="row switch">
-      <input type="checkbox" id="enabled" />
-      <span>Bật dịch song ngữ</span>
-    </label>
-
-    <section>
-      <label for="apiKey">Claude API key</label>
-      <div class="inline">
-        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
-        <button id="toggleKey" type="button" title="Hiện/ẩn">👁</button>
+    <header>
+      <div class="grow">
+        <h1>YT Bilingual</h1>
+        <p id="statusLine" class="sub"></p>
       </div>
-      <div class="inline">
-        <button id="saveKey" type="button">Lưu key</button>
-        <button id="testKey" type="button" class="secondary">Kiểm tra</button>
-      </div>
-      <p id="keyStatus" class="status"></p>
-      <p class="hint">Key chỉ lưu trong trình duyệt này và chỉ service worker của extension dùng. Lấy key tại platform.claude.com → Khóa API.</p>
-    </section>
+      <input type="checkbox" id="enabled" class="sw" role="switch" aria-label="Bật dịch song ngữ" />
+    </header>
 
-    <section>
-      <label for="model">Model</label>
-      <select id="model"></select>
+    <div class="tiles">
+      <button id="openVocab" type="button" class="tile primary">
+        <span class="tile-label">Sổ từ vựng</span>
+        <span class="tile-value" id="vocabCount">0 từ</span>
+      </button>
+      <button id="costTile" type="button" class="tile">
+        <span class="tile-label">Tháng này</span>
+        <span class="tile-value" id="monthTile">$0</span>
+        <progress id="tileBar" max="1" value="0" hidden></progress>
+      </button>
+    </div>
 
-      <label for="targetLang">Dịch sang</label>
-      <select id="targetLang"></select>
+    <!-- name="sec": chỉ mở một mục mỗi lần (details exclusive accordion). -->
+    <div class="acc">
+      <details name="sec" id="sec-dich">
+        <summary><span class="name">Dịch</span><span class="sum" id="sumDich"></span></summary>
+        <div class="body">
+          <label for="model">Model</label>
+          <select id="model"></select>
+          <label for="targetLang">Dịch sang</label>
+          <select id="targetLang"></select>
+          <label for="altTargetLang" id="altLabel">Video đã là ngôn ngữ trên thì dịch sang</label>
+          <select id="altTargetLang"></select>
+        </div>
+      </details>
 
-      <label for="altTargetLang">Nếu video đã là ngôn ngữ trên, dịch sang</label>
-      <select id="altTargetLang"></select>
-    </section>
+      <details name="sec" id="sec-hien">
+        <summary><span class="name">Hiển thị</span><span class="sum" id="sumHien"></span></summary>
+        <div class="body">
+          <div id="display" class="seg" role="group" aria-label="Hiển thị"></div>
+          <label class="range">
+            <span>Cỡ chữ</span>
+            <input type="range" id="fontScale" min="0.7" max="1.6" step="0.1" />
+            <span id="fontScaleValue" class="muted"></span>
+          </label>
+        </div>
+      </details>
 
-    <section>
-      <label for="display">Hiển thị</label>
-      <select id="display"></select>
+      <details name="sec" id="sec-hoc">
+        <summary><span class="name">Học</span><span class="sum" id="sumHoc"></span></summary>
+        <div class="body">
+          <label class="toggle">
+            <span class="grow"><b>Bảng transcript</b><small>Cạnh video · bấm câu để tua · <kbd>Q</kbd> hiện/ẩn</small></span>
+            <input type="checkbox" id="panel" class="sw" role="switch" />
+          </label>
+          <label class="toggle">
+            <span class="grow"><b>Phím tắt theo câu</b><small><kbd>A</kbd> trước · <kbd>D</kbd> sau · <kbd>S</kbd> nghe lại</small></span>
+            <input type="checkbox" id="shortcuts" class="sw" role="switch" />
+          </label>
+          <label class="toggle">
+            <span class="grow"><b>Tự dừng sau mỗi câu</b><small><kbd>K</kbd>/Space nghe tiếp · <kbd>S</kbd> nghe lại</small></span>
+            <input type="checkbox" id="autoPause" class="sw" role="switch" />
+          </label>
+          <p class="hint">Tra từ: bấm một từ trên phụ đề (kéo để chọn cụm) hoặc bôi đen chữ trong bảng transcript.</p>
+        </div>
+      </details>
 
-      <label for="fontScale">Cỡ chữ <span id="fontScaleValue"></span></label>
-      <input type="range" id="fontScale" min="0.7" max="1.6" step="0.1" />
-    </section>
+      <details name="sec" id="sec-chi">
+        <summary><span class="name">Chi phí</span><span class="sum" id="sumChi"></span></summary>
+        <div class="body">
+          <div class="kv"><span>Tháng này</span><b id="monthUsd">$0</b></div>
+          <progress id="budgetBar" max="1" value="0" hidden></progress>
+          <p id="budgetStatus" class="status" hidden></p>
+          <div class="kv"><span>Tổng</span><b id="totalUsd">$0</b></div>
+          <label class="inline-field">
+            <span class="grow">Giới hạn mỗi tháng</span>
+            <span class="muted">$</span>
+            <input type="number" id="budget" min="0" step="0.5" inputmode="decimal" />
+          </label>
+          <p class="hint">0 = không giới hạn. Ước tính theo token thật API trả về; số chính xác ở platform.claude.com → Usage.</p>
+        </div>
+      </details>
 
-    <section>
-      <label class="row switch">
-        <input type="checkbox" id="panel" />
-        <span>Bảng transcript cạnh video</span>
-      </label>
-      <p class="hint">Bấm vào câu để tua tới đó. Khi xem toàn màn hình, bấm <kbd>Q</kbd> để hiện/ẩn.</p>
-      <label class="row switch">
-        <input type="checkbox" id="shortcuts" />
-        <span>Phím tắt theo câu</span>
-      </label>
-      <p class="hint"><kbd>A</kbd> câu trước · <kbd>D</kbd> câu sau · <kbd>S</kbd> nghe lại câu · <kbd>Q</kbd> bảng transcript</p>
-      <label class="row switch">
-        <input type="checkbox" id="autoPause" />
-        <span>Tự dừng sau mỗi câu</span>
-      </label>
-      <p class="hint">Bấm <kbd>K</kbd>/Space để nghe tiếp, <kbd>S</kbd> để nghe lại.</p>
-    </section>
+      <details name="sec" id="sec-mem">
+        <summary><span class="name">Bộ nhớ</span><span class="sum" id="sumMem"></span></summary>
+        <div class="body">
+          <div class="kv"><span>Bản dịch đã lưu</span><b id="cacheTr">…</b></div>
+          <div class="kv"><span>Tra từ đã lưu</span><b id="cacheLk">…</b></div>
+          <div class="kv"><span>Sổ từ vựng</span><b id="vocabBytes">…</b></div>
+          <progress id="localBar" max="1" value="0"></progress>
+          <p id="localStatus" class="hint"></p>
+          <label class="inline-field">
+            <span class="grow">Tự xóa video không mở sau</span>
+            <select id="cacheDays"></select>
+          </label>
+          <button id="clearCache" type="button" class="secondary wide">Xóa bản dịch &amp; tra từ đã lưu</button>
+          <p id="cacheStatus" class="status"></p>
+          <p class="hint">Không đụng tới sổ từ vựng và API key. Mở lại video đã xóa sẽ phải dịch lại (tốn phí).</p>
+        </div>
+      </details>
 
-    <section>
-      <button id="openVocab" type="button" class="wide">📒 Sổ từ vựng <span id="vocabCount"></span></button>
-      <p class="hint">Bấm vào một từ trên phụ đề (kéo để chọn cụm) hoặc bôi đen chữ trong bảng transcript để tra nghĩa và lưu.</p>
-    </section>
-
-    <section class="usage">
-      <div><span>Tháng này</span><b id="monthUsd">$0</b></div>
-      <progress id="budgetBar" max="1" value="0" hidden></progress>
-      <p id="budgetStatus" class="status" hidden></p>
-      <div><span>Tổng</span><b id="totalUsd">$0</b></div>
-      <label for="budget">Giới hạn mỗi tháng (USD, 0 = không giới hạn)</label>
-      <input type="number" id="budget" min="0" step="0.5" inputmode="decimal" />
-      <p class="hint">Ước tính theo số token thật API trả về. Số chính xác xem ở platform.claude.com → Usage.</p>
-    </section>
+      <details name="sec" id="sec-key">
+        <summary><span class="name">API key</span><span class="sum" id="sumKey"></span></summary>
+        <div class="body">
+          <div class="inline">
+            <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" aria-label="Claude API key" />
+            <button id="toggleKey" type="button" class="secondary icon" title="Hiện/ẩn" aria-label="Hiện/ẩn key">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+          <div class="inline">
+            <button id="saveKey" type="button">Lưu key</button>
+            <button id="testKey" type="button" class="secondary">Kiểm tra</button>
+          </div>
+          <p id="keyStatus" class="status"></p>
+          <p class="hint">Key chỉ lưu trong trình duyệt này và chỉ service worker của extension dùng. Lấy key tại platform.claude.com → Khóa API.</p>
+        </div>
+      </details>
+    </div>
 
     <script type="module" src="./main.ts"></script>
   </body>

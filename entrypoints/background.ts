@@ -5,13 +5,14 @@ import type {
   LookupResponse,
   LookupResult,
   PartialMessage,
+  StorageResponse,
   SubtitleOut,
   TestKeyResponse,
   TranslateRequest,
   TranslateResponse,
 } from '@/src/messages';
 import { API_KEY_STORAGE, loadSettings } from '@/src/settings';
-import { cacheGet, cacheKey, cachePut } from '@/src/translate/cache';
+import { cacheClear, cacheGet, cacheKey, cachePrune, cachePut, cacheStats } from '@/src/translate/cache';
 import { fingerprint } from '@/src/translate/chunks';
 import { lookupTerm, testKey, TranslateError, translateChunk } from '@/src/translate/claude';
 import { LOOKUP_VERSION } from '@/src/translate/lookup';
@@ -139,7 +140,28 @@ async function handleTestKey(): Promise<TestKeyResponse> {
   }
 }
 
+/** Dọn cache quá hạn, tối đa mỗi ngày một lần (service worker thức dậy rất thường xuyên). */
+const PRUNE_AT = 'cachePrunedAt';
+async function autoPrune(force = false): Promise<number> {
+  const now = Date.now();
+  const last = Number((await browser.storage.local.get(PRUNE_AT))[PRUNE_AT]) || 0;
+  if (!force && now - last < 24 * 60 * 60 * 1000) return 0;
+  const n = await cachePrune((await loadSettings()).cacheDays, now);
+  await browser.storage.local.set({ [PRUNE_AT]: now });
+  if (n) console.log(`[yt-bilingual] dọn cache: xóa ${n} bản ghi lâu không dùng`);
+  return n;
+}
+
+async function handleStorage(clear: boolean): Promise<StorageResponse> {
+  let pruned = 0;
+  if (clear) await cacheClear();
+  else pruned = await autoPrune(true); // popup mở hoặc vừa đổi số ngày → áp dụng ngay
+  return { ok: true, stats: await cacheStats(), pruned };
+}
+
 export default defineBackground(() => {
+  void autoPrune().catch((err) => console.warn('[yt-bilingual] dọn cache lỗi', err));
+
   browser.runtime.onMessage.addListener((msg: BackgroundRequest, sender, sendResponse) => {
     const tab = sender.tab?.id !== undefined ? { tabId: sender.tab.id, frameId: sender.frameId ?? 0 } : undefined;
     const job =
@@ -149,7 +171,9 @@ export default defineBackground(() => {
           ? handleLookup(msg)
           : msg.type === 'test_key'
             ? handleTestKey()
-            : null;
+            : msg.type === 'storage_stats' || msg.type === 'storage_clear'
+              ? handleStorage(msg.type === 'storage_clear')
+              : null;
     if (!job) return false;
     job.then(sendResponse, (err) => sendResponse({ ok: false, error: 'other', message: String(err) }));
     return true; // giữ kênh mở cho sendResponse bất đồng bộ
