@@ -78,4 +78,4 @@ Cấu trúc chính:
 | `entrypoints/background.ts` | Service worker: giữ key, gọi API, cache |
 | `entrypoints/popup/` | Giao diện cài đặt |
 
-Kế hoạch và các quyết định thiết kế nằm trong [PLAN.md](PLAN.md).
+Kế hoạch và các quyết định thiết kế nằm trong [PLAN.md](PLAN.md). Lợi ích và hướng phát triển: [VISION.md](VISION.md).
