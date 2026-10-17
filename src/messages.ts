@@ -63,6 +63,39 @@ export type TranslateResponse =
   | { ok: true; result: ChunkResult; costUsd: number; cached: boolean }
   | { ok: false; error: ErrorKind; message: string };
 
+/** Tra một từ / cụm từ trong câu phụ đề. */
+export interface LookupRequest {
+  type: 'lookup';
+  /** Chữ người dùng chọn, đúng như trong câu. */
+  picked: string;
+  sentence: string;
+  /** Bản dịch của câu (nếu có), giúp Claude hiểu đúng ý. */
+  translation: string;
+  title: string;
+  sourceLang: string;
+  /** Ngôn ngữ giải nghĩa. */
+  targetLang: string;
+  videoId: string;
+}
+
+export interface LookupResult {
+  /** Dạng gốc trong từ điển ("burned out" → "burn out"). */
+  term: string;
+  ipa: string;
+  /** Loại từ (tiếng Anh, ngắn): noun, verb, phrasal verb, idiom… */
+  pos: string;
+  /** Nghĩa trong câu này, bằng ngôn ngữ đích. */
+  meaning: string;
+  /** Định nghĩa ngắn bằng tiếng Anh. */
+  definition: string;
+  /** Ghi chú cách dùng (ngôn ngữ đích), có thể rỗng. */
+  note: string;
+}
+
+export type LookupResponse =
+  | { ok: true; result: LookupResult; costUsd: number; cached: boolean }
+  | { ok: false; error: ErrorKind; message: string };
+
 export type ErrorKind = 'no_key' | 'auth' | 'credit' | 'budget' | 'rate_limit' | 'refusal' | 'network' | 'bad_output' | 'other';
 
 export interface TestKeyRequest {
@@ -71,7 +104,7 @@ export interface TestKeyRequest {
 
 export type TestKeyResponse = { ok: true } | { ok: false; error: ErrorKind; message: string };
 
-export type BackgroundRequest = TranslateRequest | TestKeyRequest;
+export type BackgroundRequest = TranslateRequest | TestKeyRequest | LookupRequest;
 
 export async function sendToBackground<R>(msg: BackgroundRequest): Promise<R> {
   return (await browser.runtime.sendMessage(msg)) as R;

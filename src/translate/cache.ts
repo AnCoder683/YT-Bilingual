@@ -7,9 +7,9 @@ import type { ChunkResult } from '../messages';
 const DB_NAME = 'yt-bilingual';
 const STORE = 'translations';
 
-interface Entry {
+interface Entry<T = ChunkResult> {
   key: string;
-  items: Record<string, ChunkResult>;
+  items: Record<string, T>;
   updatedAt: number;
 }
 
@@ -40,13 +40,13 @@ export function cacheKey(track: string, targetLang: string, model: string, promp
   return [track, targetLang, model, `p${promptVersion}`].join('|');
 }
 
-export async function cacheGet(key: string): Promise<Record<string, ChunkResult>> {
-  const e = (await tx('readonly', (s) => s.get(key))) as Entry | undefined;
+export async function cacheGet<T = ChunkResult>(key: string): Promise<Record<string, T>> {
+  const e = (await tx('readonly', (s) => s.get(key))) as Entry<T> | undefined;
   return e?.items ?? {};
 }
 
-export async function cachePut(key: string, items: Record<string, ChunkResult>): Promise<void> {
-  const prev = await cacheGet(key);
-  const entry: Entry = { key, items: { ...prev, ...items }, updatedAt: Date.now() };
+export async function cachePut<T = ChunkResult>(key: string, items: Record<string, T>): Promise<void> {
+  const prev = await cacheGet<T>(key);
+  const entry: Entry<T> = { key, items: { ...prev, ...items }, updatedAt: Date.now() };
   await tx('readwrite', (s) => s.put(entry));
 }

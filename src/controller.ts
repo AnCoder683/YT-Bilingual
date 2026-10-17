@@ -1,3 +1,5 @@
+import { LookupCard, type CloseReason } from './lookup/card';
+import { sendToBackground, type LookupResponse, type LookupResult } from './messages';
 import { AutoPause, LEAD_MS, navTarget, PAUSED_LOOKAHEAD_MS, type NavDir } from './nav';
 import { findActive } from './overlay/active';
 import { Overlay, type Notice } from './overlay/overlay';
@@ -6,6 +8,7 @@ import { heuristicLines, Translator, type DisplayLine } from './scheduler';
 import { loadSettings, needsRetranslate, onSettingsChanged, pickTarget, type Settings } from './settings';
 import { trackKey, type TimedtextInfo } from './timedtext';
 import type { Transcript as Parsed } from './transcript';
+import { addVocab, hasVocab } from './vocab';
 
 interface Transcript {
   info: TimedtextInfo;
@@ -56,10 +59,25 @@ export class Controller {
    * từ nó (video có thể dừng trễ vài chục ms, khi đó thời gian đã sang câu sau).
    */
   private pin: number | null = null;
-  private panel = new TranscriptPanel((ms) => this.seekTo(ms));
+  private panel = new TranscriptPanel(
+    (ms) => this.seekTo(ms),
+    (p) => this.startLookup(p.text, p.line, p.rect, false),
+  );
   private layoutObserver: MutationObserver | null = null;
+  /** Dòng đang hiện trên video (để biết câu chứa chữ vừa bấm). */
+  private shownLine: DisplayLine | null = null;
+  private card = new LookupCard({
+    onSave: () => void this.saveLookup(),
+    onClose: (reason) => this.onCardClose(reason),
+  });
+  /** Lần tra đang mở; `resume`: chính extension đã dừng video, đóng ô thì phát tiếp. */
+  private lookup: { picked: string; line: DisplayLine; result: LookupResult | null; resume: boolean; seq: number } | null = null;
+  private lookupSeq = 0;
 
   constructor() {
+    this.overlay.onPick = (p) => {
+      if (this.shownLine) this.startLookup(p.text, this.shownLine, p.rect, true);
+    };
     document.addEventListener('yt-navigate-finish', () => this.onNavigate());
     document.addEventListener('keydown', (e) => this.onKey(e), true);
     // Đổi bố cục (cửa sổ hẹp ↔ rộng, toàn màn hình) khi video đang dừng: đặt lại bảng.
@@ -104,6 +122,7 @@ export class Controller {
     const prev = this.transcript;
     if (prev && trackKey(prev.info) === trackKey(info) && prev.parsed.tokens.length === parsed.tokens.length) return;
     this.transcript = { info, parsed, plain: heuristicLines(parsed) };
+    this.overlay.setLang(info.tlang ?? info.lang ?? 'en');
     log(`hiển thị ${parsed.sentences.length} câu`, `${info.lang}${info.kind ? '/' + info.kind : ''}`);
     this.bindPlayer();
     this.resetTranslator();
@@ -129,8 +148,12 @@ export class Controller {
       video.addEventListener('seeking', () => {
         this.autoPause.reset();
         this.pin = null;
+        this.card.close('external');
       });
-      video.addEventListener('play', () => (this.pin = null));
+      video.addEventListener('play', () => {
+        this.pin = null;
+        this.card.close('external');
+      });
       for (const ev of ['play', 'seeked', 'timeupdate', 'pause', 'ratechange'] as const) {
         video.addEventListener(ev, () => this.tick());
       }
@@ -166,6 +189,61 @@ export class Controller {
 
   private lines(transcript: Transcript): readonly DisplayLine[] {
     return this.translator ? this.translator.lines() : transcript.plain;
+  }
+
+  /** Bấm / kéo chọn chữ (trên phụ đề hoặc bôi đen trong bảng): dừng video và tra. */
+  private async startLookup(picked: string, line: DisplayLine, rect: DOMRect, onVideo: boolean): Promise<void> {
+    const { video, transcript, settings } = this;
+    if (!video || !transcript) return;
+    const resume = this.lookup?.resume ?? !video.paused;
+    const seq = ++this.lookupSeq;
+    this.lookup = { picked, line, result: null, resume, seq };
+    if (!video.paused) video.pause();
+    if (onVideo) this.pin = line.startMs; // giữ đúng câu này trên màn hình khi dừng
+    this.card.open(rect, picked, line.source, onVideo || !!document.fullscreenElement);
+
+    const sourceLang = transcript.info.tlang ?? transcript.info.lang ?? 'en';
+    const targetLang = (settings && pickTarget(sourceLang, settings)) ?? settings?.targetLang ?? 'vi';
+    const res = await sendToBackground<LookupResponse>({
+      type: 'lookup',
+      picked,
+      sentence: line.source,
+      translation: line.translation ?? '',
+      title: videoTitle(),
+      sourceLang,
+      targetLang,
+      videoId: transcript.info.videoId ?? '',
+    }).catch((err): LookupResponse => ({ ok: false, error: 'other', message: String(err) }));
+    if (this.lookup?.seq !== seq || !this.card.opened) return;
+    if (!res.ok) return this.card.setError(res.message);
+    this.lookup.result = res.result;
+    this.card.setResult(res.result, await hasVocab(res.result.term, line.source));
+  }
+
+  private async saveLookup(): Promise<void> {
+    const l = this.lookup;
+    if (!l?.result || !this.transcript) return;
+    await addVocab({
+      ...l.result,
+      picked: l.picked,
+      sentence: l.line.source,
+      translation: l.line.translation ?? '',
+      videoId: this.transcript.info.videoId ?? '',
+      title: videoTitle(),
+      tMs: l.line.startMs,
+    });
+    if (this.lookup === l) this.card.setSaved(true);
+  }
+
+  private onCardClose(reason: CloseReason): void {
+    this.overlay.clearPick();
+    const l = this.lookup;
+    this.lookup = null;
+    const video = this.video;
+    if (!l || !video) return;
+    if (reason === 'replay') return this.seekTo(l.line.startMs);
+    // Bấm vào video để đóng: YouTube tự phát tiếp bằng chính cú bấm đó.
+    if (l.resume && video.paused && (reason === 'esc' || reason === 'button' || reason === 'outside')) void video.play();
   }
 
   /** Bấm vào câu trong bảng transcript: tua tới đầu câu và phát. */
@@ -232,6 +310,7 @@ export class Controller {
       const lines = this.lines(transcript);
       const tShow = !video.paused ? tMs : (this.pin ?? tMs + PAUSED_LOOKAHEAD_MS);
       const line = lines[findActive(lines, tShow)] ?? null;
+      this.shownLine = line;
       this.overlay.show(line?.source ?? null, line?.translation ?? null, this.notice(tr, tMs));
     }
     if (ours && this.settings?.autoPause && !video.paused && this.autoPause.update(this.lines(transcript), tMs)) {

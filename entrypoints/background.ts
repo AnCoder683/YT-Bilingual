@@ -1,6 +1,9 @@
 import type {
   BackgroundRequest,
   ChunkResult,
+  LookupRequest,
+  LookupResponse,
+  LookupResult,
   PartialMessage,
   SubtitleOut,
   TestKeyResponse,
@@ -9,7 +12,9 @@ import type {
 } from '@/src/messages';
 import { API_KEY_STORAGE, loadSettings } from '@/src/settings';
 import { cacheGet, cacheKey, cachePut } from '@/src/translate/cache';
-import { testKey, TranslateError, translateChunk } from '@/src/translate/claude';
+import { fingerprint } from '@/src/translate/chunks';
+import { lookupTerm, testKey, TranslateError, translateChunk } from '@/src/translate/claude';
+import { LOOKUP_VERSION } from '@/src/translate/lookup';
 import { PROMPT_VERSION, type PromptInput } from '@/src/translate/prompt';
 import { addUsage, budgetError, loadUsage } from '@/src/translate/usage';
 
@@ -98,6 +103,30 @@ async function handleTranslate(req: TranslateRequest, tab?: { tabId: number; fra
   return { ok: true, result, costUsd: cost, cached: false };
 }
 
+/** Tra từ: cache theo (chữ chọn, câu), mỗi mục một bản ghi. */
+async function handleLookup(req: LookupRequest): Promise<LookupResponse> {
+  const { model, monthlyBudgetUsd } = await loadSettings();
+  const key = ['lookup', req.targetLang, model, `v${LOOKUP_VERSION}`, fingerprint(`${req.picked.toLowerCase()}\u0000${req.sentence}`)].join('|');
+  const hit = (await cacheGet<LookupResult>(key)).r;
+  if (hit) return { ok: true, result: hit, costUsd: 0, cached: true };
+
+  const apiKey = await getApiKey();
+  if (!apiKey) return { ok: false, error: 'no_key', message: 'Chưa có API key — mở popup YT Bilingual để nhập.' };
+  const over = budgetError((await loadUsage()).monthUsd, monthlyBudgetUsd);
+  if (over) return { ok: false, error: 'budget', message: over };
+
+  try {
+    const { result, costUsd } = await withSlot(() => lookupTerm(apiKey, model, req));
+    await cachePut<LookupResult>(key, { r: result });
+    await addUsage(req.videoId, costUsd);
+    return { ok: true, result, costUsd, cached: false };
+  } catch (err) {
+    const e = err instanceof TranslateError ? err : new TranslateError('other', String(err));
+    if (e.costUsd) await addUsage(req.videoId, e.costUsd);
+    return { ok: false, error: e.kind, message: e.message };
+  }
+}
+
 async function handleTestKey(): Promise<TestKeyResponse> {
   const apiKey = await getApiKey();
   if (!apiKey) return { ok: false, error: 'no_key', message: 'Chưa nhập API key.' };
@@ -113,7 +142,14 @@ async function handleTestKey(): Promise<TestKeyResponse> {
 export default defineBackground(() => {
   browser.runtime.onMessage.addListener((msg: BackgroundRequest, sender, sendResponse) => {
     const tab = sender.tab?.id !== undefined ? { tabId: sender.tab.id, frameId: sender.frameId ?? 0 } : undefined;
-    const job = msg.type === 'translate' ? handleTranslate(msg, tab) : msg.type === 'test_key' ? handleTestKey() : null;
+    const job =
+      msg.type === 'translate'
+        ? handleTranslate(msg, tab)
+        : msg.type === 'lookup'
+          ? handleLookup(msg)
+          : msg.type === 'test_key'
+            ? handleTestKey()
+            : null;
     if (!job) return false;
     job.then(sendResponse, (err) => sendResponse({ ok: false, error: 'other', message: String(err) }));
     return true; // giữ kênh mở cho sendResponse bất đồng bộ

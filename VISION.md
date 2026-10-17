@@ -41,8 +41,8 @@ Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp
 | Ý tưởng | Mô tả | Giá trị | Công sức |
 |---|---|---|---|
 | ✅ Phím tắt theo câu | `A`/`D` lùi hoặc tiến một câu, `S` lặp lại câu hiện tại, tự dừng sau mỗi câu | Cao | Thấp |
-| Bấm vào từ để tra | Bấm một từ trong dòng gốc → nghĩa theo đúng ngữ cảnh câu (hỏi Claude), phiên âm | Cao | Vừa |
-| Sổ từ vựng | Lưu từ hoặc câu kèm mốc thời gian video; xuất sang Anki/CSV | Cao | Vừa |
+| ✅ Bấm vào từ để tra | Bấm một từ trong dòng gốc → nghĩa theo đúng ngữ cảnh câu (hỏi Claude), phiên âm | Cao | Vừa |
+| ✅ Sổ từ vựng | Lưu từ hoặc câu kèm mốc thời gian video; xuất sang Anki/CSV | Cao | Vừa |
 | Giải thích thành ngữ, tiếng lóng | Câu có idiom thì hiện biểu tượng 💡, rê chuột để xem giải thích | Vừa | Vừa |
 | Chế độ luyện nghe | Ẩn dòng gốc, chỉ hiện khi bấm, hoặc hiện sau vài giây | Vừa | Thấp |
 
@@ -93,5 +93,5 @@ Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp
 
 1. ✅ **Phím tắt theo câu + giới hạn ngân sách:** đã xong.
 2. ✅ **Bảng transcript song ngữ** (đã xong). Xuất file để sau, làm chung với sổ từ vựng / Anki.
-3. **Glossary theo kênh + bấm vào từ để tra:** nâng chất lượng dịch và giá trị học tập.
+3. ✅ **Bấm vào từ để tra + sổ từ vựng + xuất CSV cho Anki** (đã xong). Tiếp theo: glossary theo kênh, chế độ luyện nghe.
 4. **Phát hành Chrome Web Store / Firefox:** khi đã dùng ổn định một thời gian.

@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { ChunkResult, ErrorKind, SubtitleOut } from '../messages';
+import type { ChunkResult, ErrorKind, LookupResult, SubtitleOut } from '../messages';
 import { modelInfo } from '../settings';
 import { costUsd } from './cost';
+import { buildLookupMessage, LOOKUP_SCHEMA, LOOKUP_SYSTEM, parseLookup, type LookupInput } from './lookup';
 import {
   buildUserMessage,
   parsePartial,
@@ -90,6 +91,29 @@ export async function translateChunk(
       throw new TranslateError('bad_output', 'Claude trả về JSON không hợp lệ.', cost);
     }
     return { result, costUsd: cost };
+  } catch (err) {
+    throw toTranslateError(err);
+  }
+}
+
+/** Tra một từ / cụm từ trong câu (ngắn, không stream). */
+export async function lookupTerm(apiKey: string, model: string, input: LookupInput): Promise<{ result: LookupResult; costUsd: number }> {
+  try {
+    const res = await getClient(apiKey).messages.create({
+      model,
+      max_tokens: 2000,
+      system: LOOKUP_SYSTEM,
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: LOOKUP_SCHEMA } },
+      messages: [{ role: 'user', content: buildLookupMessage(input) }],
+    });
+    const cost = costUsd(model, res.usage);
+    if (res.stop_reason === 'refusal') throw new TranslateError('refusal', 'Claude từ chối tra từ này.', cost);
+    const text = res.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
+    try {
+      return { result: parseLookup(text, input.picked), costUsd: cost };
+    } catch {
+      throw new TranslateError('bad_output', 'Claude trả về kết quả tra từ không hợp lệ.', cost);
+    }
   } catch (err) {
     throw toTranslateError(err);
   }

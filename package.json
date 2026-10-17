@@ -21,6 +21,7 @@
     "wxt": "^0.21.4"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.135.0"
+    "@anthropic-ai/sdk": "^0.135.0",
+    "fflate": "^0.8.3"
   }
 }

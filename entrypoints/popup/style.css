@@ -68,3 +68,4 @@ kbd {
 }
 progress { width: 100%; height: 6px; accent-color: var(--accent); }
 progress.warn { accent-color: var(--err); }
+button.wide { width: 100%; }

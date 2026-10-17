@@ -9,12 +9,13 @@ Tài liệu này mô tả từng chức năng của extension: nó làm gì, dù
 3. [Hiện dần và dịch trước](#3-hiện-dần-và-dịch-trước)
 4. [Cache: xem lại không tốn tiền](#4-cache-xem-lại-không-tốn-tiền)
 5. [Bảng transcript song ngữ](#5-bảng-transcript-song-ngữ)
-6. [Phím tắt theo câu và chế độ tự dừng](#6-phím-tắt-theo-câu-và-chế-độ-tự-dừng)
-7. [Chi phí và giới hạn ngân sách](#7-chi-phí-và-giới-hạn-ngân-sách)
-8. [Cài đặt trong popup](#8-cài-đặt-trong-popup)
-9. [Thông báo và xử lý lỗi](#9-thông-báo-và-xử-lý-lỗi)
-10. [Bảo mật và quyền riêng tư](#10-bảo-mật-và-quyền-riêng-tư)
-11. [Tóm tắt phím tắt](#11-tóm-tắt-phím-tắt)
+6. [Tra từ và sổ từ vựng (Anki)](#6-tra-từ-và-sổ-từ-vựng-anki)
+7. [Phím tắt theo câu và chế độ tự dừng](#7-phím-tắt-theo-câu-và-chế-độ-tự-dừng)
+8. [Chi phí và giới hạn ngân sách](#8-chi-phí-và-giới-hạn-ngân-sách)
+9. [Cài đặt trong popup](#9-cài-đặt-trong-popup)
+10. [Thông báo và xử lý lỗi](#10-thông-báo-và-xử-lý-lỗi)
+11. [Bảo mật và quyền riêng tư](#11-bảo-mật-và-quyền-riêng-tư)
+12. [Tóm tắt phím tắt](#12-tóm-tắt-phím-tắt)
 
 ---
 
@@ -88,7 +89,58 @@ Bảng chứa toàn bộ câu của video, mỗi câu có bản gốc và bản 
 - **Tắt CC thì bảng vẫn chạy và vẫn dịch.** Chỉ cần bật CC một lần để extension lấy được phụ đề.
 - Theo giao diện sáng/tối của YouTube.
 
-## 6. Phím tắt theo câu và chế độ tự dừng
+## 6. Tra từ và sổ từ vựng (Anki)
+
+### Tra từ
+
+| Ở đâu | Cách chọn |
+|---|---|
+| Phụ đề trên video | **Bấm** một từ của dòng câu gốc; **nhấn giữ rồi kéo** qua nhiều từ để chọn cụm ("burn out", "keep up with") |
+| Bảng transcript | **Bôi đen** chữ trong câu gốc (kéo chuột, hoặc nhấp đúp vào một từ) rồi bấm nút **Tra** hiện ngay trên chữ |
+
+- Video **tự dừng** và một ô hiện ra, giải nghĩa **theo đúng câu đang nghe** chứ không phải nghĩa chung chung của từ điển:
+  - dạng gốc của từ (ví dụ "burned out" → "burn out"), phiên âm IPA, loại từ;
+  - **nghĩa tiếng Việt** trong câu này;
+  - **định nghĩa tiếng Anh** ngắn;
+  - ghi chú cách dùng nếu có (tiếng lóng, văn phong, nghĩa khác hay gặp);
+  - câu gốc với chữ đã chọn được in đậm.
+- Nút **＋ Lưu vào sổ** và **↺ Nghe lại câu** (tua về đầu câu và phát).
+- Đóng bằng `Esc`, nút ✕ hoặc bấm ra ngoài. Nếu chính extension đã dừng video thì video **tự phát tiếp**; nếu bạn dừng từ trước thì vẫn dừng.
+- Chạy cả khi xem toàn màn hình.
+- Chi phí khoảng **$0,0001 mỗi lần tra** với Haiku (1.000 lần ≈ $0,1). Tra lại cùng chữ trong cùng câu thì lấy từ cache, miễn phí. Giới hạn ngân sách tháng cũng áp dụng cho tra từ.
+- Bấm vào chỗ trống trên video vẫn dừng/phát như bình thường; chỉ chữ của câu gốc mới bấm để tra được. Khi thanh điều khiển của YouTube hiện, phụ đề tự nâng lên ngay trên thanh để không bị che.
+
+### Sổ từ vựng
+
+Mở từ popup → **📒 Sổ từ vựng**. Mỗi mục gồm: từ, phiên âm, loại từ, nghĩa, định nghĩa, câu gốc (chữ đã chọn in đậm), bản dịch câu, và link **▶ mm:ss** mở đúng chỗ trong video.
+
+- Tìm trong sổ (theo từ, nghĩa, câu), xóa từng mục hoặc xóa tất cả.
+- Cùng một từ trong cùng một câu chỉ lưu một lần.
+- Sổ nằm trong trình duyệt (`chrome.storage.local`), cập nhật ngay khi bạn lưu từ ở tab YouTube.
+
+### Xuất file
+
+Trong sổ từ vựng, bấm **Xuất file ▾**. Hộp xuất gồm:
+
+- **Định dạng file** (danh sách thả xuống) và **Mẫu** của định dạng đó; mẫu nên dùng có nhãn *Nên dùng*.
+- **Kèm theo**: phiên âm và loại từ, câu ví dụ và bản dịch, link video (mốc thời gian).
+- **Phạm vi**: cả sổ, hoặc chỉ các từ đang hiện theo ô tìm kiếm.
+- **Xem trước** đúng nội dung sẽ xuất, đổi ngay khi bạn đổi lựa chọn; tên file; nút **Tải xuống** (và **Chép** với các định dạng văn bản).
+- Lựa chọn lần trước được nhớ lại.
+
+| Định dạng | Mẫu | Dùng để |
+|---|---|---|
+| **Excel** `.xlsx` | **Bảng đầy đủ** (mọi cột) · **Bảng ôn nhanh** (Từ · Nghĩa · Câu) · **Theo video** (mỗi video một trang tính) | Lọc, sắp xếp, tô màu; dòng tiêu đề cố định, có bộ lọc; ô Video bấm mở đúng chỗ |
+| **Word** `.docx` | **Sổ tay từ vựng** · **Bài tập điền từ** (câu bị che chữ đã tra, đáp án ở trang cuối) · **Gập đôi tự kiểm tra** (bảng Từ │ Nghĩa, gập giấy để che) | Sửa tiếp trong Word / Google Docs, in ra học |
+| **PDF** | Ba mẫu như Word | Bấm **In / Lưu PDF** → hộp thoại in → *Lưu dưới dạng PDF* (khổ A4) |
+| **Anki** `.txt` | **Điền chỗ trống (Cloze)**: câu thật bị che đúng chữ đã tra, gợi ý là nghĩa · **Cơ bản**: từ + câu → nghĩa · **Hai chiều**: thêm thẻ nghĩa → từ | Anki: **File → Import**. Header trong file tự chọn kiểu thẻ, HTML và tag `yt-bilingual` (Anki 2.1.55+) |
+| **Quizlet** `.txt` | **Từ ↔ Nghĩa** · **Câu ↔ Bản dịch** | Quizlet: Tạo học phần → **Nhập** → dán (giữa thuật ngữ và định nghĩa: Tab; giữa các thẻ: Dòng mới) |
+| **Markdown** `.md` | **Bảng** · **Ghi chú theo video** | Dán vào Notion / Obsidian |
+| **CSV** `.csv` | **Tất cả các cột** | Dữ liệu thô cho ứng dụng khác; có BOM nên Excel mở đúng tiếng Việt |
+
+Không xuất được âm thanh câu nói (extension không ghi âm từ YouTube); thay vào đó các mẫu đều có link **▶ mm:ss** mở đúng chỗ trong video.
+
+## 7. Phím tắt theo câu và chế độ tự dừng
 
 Dành cho luyện nghe:
 
@@ -105,7 +157,7 @@ Dành cho luyện nghe:
   - Vẫn đúng khi câu sau nối liền ngay hoặc khi bạn tua bằng phím của YouTube.
 - Phím tắt **không chạy khi đang gõ chữ** (ô tìm kiếm, bình luận) và không đụng phím tắt của YouTube. Tắt được trong popup.
 
-## 7. Chi phí và giới hạn ngân sách
+## 8. Chi phí và giới hạn ngân sách
 
 - Popup hiện **chi phí tháng này** và **tổng chi phí**, tính theo số token thật API trả về.
 - Tham khảo: Haiku 5.5 tốn khoảng **$0,06 cho mỗi giờ video**. Sonnet 5.5 đắt hơn khoảng 20 lần.
@@ -118,7 +170,7 @@ Dành cho luyện nghe:
 - Tăng giới hạn thì extension tự dịch tiếp, không cần tải lại trang.
 - Các đoạn đang dịch dở vẫn chạy cho xong, nên có thể vượt mức một chút.
 
-## 8. Cài đặt trong popup
+## 9. Cài đặt trong popup
 
 | Mục | Ý nghĩa |
 |---|---|
@@ -132,10 +184,11 @@ Dành cho luyện nghe:
 | Phím tắt theo câu | Bật/tắt `A` `D` `S` `Q` |
 | Tự dừng sau mỗi câu | Chế độ luyện nghe |
 | Giới hạn mỗi tháng | Ngân sách USD |
+| 📒 Sổ từ vựng | Mở trang sổ từ vựng (xem, tìm, xóa, xuất file) |
 
 Thay đổi có hiệu lực ngay, không cần tải lại trang. Đổi model, ngôn ngữ hay key thì dịch lại; đổi cách hiển thị thì giữ bản dịch đã có.
 
-## 9. Thông báo và xử lý lỗi
+## 10. Thông báo và xử lý lỗi
 
 Khi chưa có bản dịch, dòng bản dịch trên video được dùng để báo trạng thái:
 
@@ -148,14 +201,14 @@ Khi chưa có bản dịch, dòng bản dịch trên video được dùng để 
 
 Nếu Claude trả về JSON hỏng, extension tự gọi lại một lần.
 
-## 10. Bảo mật và quyền riêng tư
+## 11. Bảo mật và quyền riêng tư
 
 - **API key** chỉ lưu trong `chrome.storage.local` của trình duyệt và chỉ service worker của extension dùng. Trang YouTube không đọc được key.
-- Extension chỉ gửi **nội dung phụ đề và tiêu đề video** tới `api.anthropic.com`. Không có máy chủ trung gian, không thu thập dữ liệu.
-- Bản dịch và thống kê chi phí chỉ nằm trong trình duyệt của bạn.
+- Extension chỉ gửi **nội dung phụ đề và tiêu đề video** (và chữ bạn chọn để tra) tới `api.anthropic.com`. Không có máy chủ trung gian, không thu thập dữ liệu.
+- Bản dịch, sổ từ vựng và thống kê chi phí chỉ nằm trong trình duyệt của bạn.
 - Mã nguồn mở, có unit test: https://github.com/AnCoder683/YT-Bilingual
 
-## 11. Tóm tắt phím tắt
+## 12. Tóm tắt phím tắt
 
 | Phím | Tác dụng | Ghi chú |
 |---|---|---|
@@ -163,6 +216,7 @@ Nếu Claude trả về JSON hỏng, extension tự gọi lại một lần.
 | `D` | Câu sau | Của extension |
 | `S` | Nghe lại câu | Của extension |
 | `Q` | Thu gọn/mở bảng transcript; toàn màn hình: hiện/ẩn | Của extension |
+| `Esc` | Đóng ô tra từ (video phát tiếp nếu extension đã dừng nó) | Của extension |
 | `c` | Bật/tắt phụ đề (CC) | Của YouTube, cần bật một lần để extension chạy |
 | `K` / Space | Phát / dừng | Của YouTube |
 | `t` | Chế độ rạp hát | Của YouTube |

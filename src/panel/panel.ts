@@ -1,4 +1,5 @@
 import { lastStarted } from '../nav';
+import { fmtTime } from '../vocab';
 import { findActive } from '../overlay/active';
 import type { DisplayLine } from '../scheduler';
 import { containerFor, pickPlace, readLayout, type PanelPlace } from './place';
@@ -12,6 +13,10 @@ const COLLAPSED_STORAGE = 'panelCollapsed';
 const REBUILD_MS = 400;
 /** Người dùng tự cuộn thì ngừng tự cuộn theo video chừng này. */
 const FOLLOW_PAUSE_MS = 10_000;
+/** Chờ chừng này mới tua khi bấm câu: nhấp đúp (bôi đen một từ để tra) thì không tua. */
+const CLICK_DELAY_MS = 250;
+/** Bôi đen dài hơn chừng này từ thì không hiện nút Tra. */
+const LOOKUP_MAX_WORDS = 8;
 
 const STYLE = `
 :host {
@@ -161,15 +166,20 @@ mark { background: #f9c513; color: #000; border-radius: 2px; }
   cursor: pointer;
 }
 .follow[hidden] { display: none; }
-`;
-
-function fmtTime(ms: number): string {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(s / 3600);
-  const mm = String(Math.floor((s % 3600) / 60));
-  const ss = String(s % 60).padStart(2, '0');
-  return h ? `${h}:${mm.padStart(2, '0')}:${ss}` : `${mm}:${ss}`;
+.lookup {
+  position: absolute;
+  z-index: 2;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font: 500 13px Roboto, Arial, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
+.lookup[hidden] { display: none; }
+`;
 
 // Tạo DOM thủ công: YouTube bật Trusted Types nên tránh innerHTML.
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -183,8 +193,20 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: 
  * Bảng transcript song ngữ: toàn bộ câu (gốc + dịch), tô sáng câu đang phát,
  * tự cuộn theo video, bấm vào câu để tua, tìm kiếm (bỏ dấu, không phân biệt hoa thường).
  */
+/** Bôi đen chữ trong bảng để tra: chữ, câu chứa nó, vị trí trên màn hình. */
+export interface PanelPick {
+  text: string;
+  line: DisplayLine;
+  rect: DOMRect;
+}
+
 export class TranscriptPanel {
   private host = el('div');
+  private root: ShadowRoot;
+  private panel = el('div', 'panel');
+  private lookupBtn = el('button', 'lookup', 'Tra');
+  private pendingPick: PanelPick | null = null;
+  private clickTimer = 0;
   private list = el('div', 'list');
   private input = el('input');
   private count = el('span', 'count');
@@ -210,9 +232,12 @@ export class TranscriptPanel {
   private player: HTMLElement | null = null;
   private down: { x: number; y: number } | null = null;
 
-  constructor(private onSeek: (ms: number) => void) {
+  constructor(
+    private onSeek: (ms: number) => void,
+    private onLookup: (pick: PanelPick) => void,
+  ) {
     this.host.id = HOST_ID;
-    const root = this.host.attachShadow({ mode: 'open' });
+    const root = (this.root = this.host.attachShadow({ mode: 'open' }));
     const style = el('style');
     style.textContent = STYLE;
 
@@ -224,9 +249,23 @@ export class TranscriptPanel {
     this.followBtn.hidden = true;
     const head = el('div', 'head');
     head.append(el('span', 'title', 'Transcript'), this.input, this.count, this.collapseBtn);
-    const panel = el('div', 'panel');
-    panel.append(head, this.list, this.followBtn);
+    const panel = this.panel;
+    this.lookupBtn.type = 'button';
+    this.lookupBtn.hidden = true;
+    panel.append(head, this.list, this.followBtn, this.lookupBtn);
     root.append(style, panel);
+    this.lookupBtn.addEventListener('pointerdown', (e) => e.preventDefault()); // giữ nguyên vùng bôi đen
+    this.lookupBtn.addEventListener('click', () => {
+      const p = this.pendingPick;
+      this.hideLookup();
+      this.selection()?.removeAllRanges(); // bảng được vẽ lại bình thường
+      if (p) this.onLookup(p);
+    });
+    this.list.addEventListener('mouseup', () => setTimeout(() => this.checkSelection(), 0));
+    this.list.addEventListener('scroll', () => this.hideLookup(), { passive: true });
+    document.addEventListener('selectionchange', () => {
+      if (!this.selectedText()) this.hideLookup();
+    });
 
     // Trong player (toàn màn hình), click/double-click sẽ làm YouTube dừng
     // video / thoát toàn màn hình; phím gõ trong ô tìm kiếm không được thành phím tắt.
@@ -256,6 +295,7 @@ export class TranscriptPanel {
     };
     this.list.addEventListener('wheel', userScroll, { passive: true });
     this.list.addEventListener('touchmove', userScroll, { passive: true });
+    window.addEventListener('pointerup', () => setTimeout(() => (this.down = null), CLICK_DELAY_MS + 50), true);
     this.list.addEventListener('pointerdown', (e) => {
       this.down = { x: e.clientX, y: e.clientY };
       if (e.target === this.list) userScroll(); // kéo thanh cuộn
@@ -352,6 +392,14 @@ export class TranscriptPanel {
   }
 
   private rebuild(): void {
+    // Vẽ lại sẽ xóa vùng đang bôi đen (để tra / chép): đợi người dùng xong đã.
+    if (this.down || this.selectedText()) {
+      this.rebuildTimer = window.setTimeout(() => {
+        this.rebuildTimer = 0;
+        this.rebuild();
+      }, REBUILD_MS);
+      return;
+    }
     const lines = this.latest;
     this.lastRebuild = Date.now();
     const keepTop = this.list.scrollTop;
@@ -388,14 +436,57 @@ export class TranscriptPanel {
   }
 
   private onRowClick(e: MouseEvent): void {
-    // Kéo chuột để bôi đen chữ (chép từ) thì không tua.
+    clearTimeout(this.clickTimer);
+    // Kéo chuột hoặc nhấp đúp để bôi đen chữ (tra từ, chép) thì không tua.
     const d = this.down;
-    if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) return;
+    if (e.detail > 1 || (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4)) return;
     const row = (e.target as Element).closest<HTMLElement>('.row');
     const line = row ? this.shown?.[Number(row.dataset.i)] : undefined;
     if (!line) return;
-    this.onSeek(line.startMs);
-    this.resumeFollow();
+    this.clickTimer = window.setTimeout(() => {
+      if (this.selectedText()) return;
+      this.onSeek(line.startMs);
+      this.resumeFollow();
+    }, CLICK_DELAY_MS);
+  }
+
+  /** Chrome có getSelection() trên ShadowRoot (chưa chuẩn): vùng bôi đen bên trong bảng. */
+  private selection(): Selection | null {
+    const r = this.root as ShadowRoot & { getSelection?: () => Selection | null };
+    return r.getSelection?.() ?? document.getSelection();
+  }
+
+  private selectedText(): string {
+    return this.selection()?.toString().trim() ?? '';
+  }
+
+  /** Bôi đen gọn trong câu gốc của một dòng thì hiện nút Tra ngay trên vùng bôi đen. */
+  private checkSelection(): void {
+    const sel = this.selection();
+    const text = sel?.toString().replace(/\s+/g, ' ').trim() ?? '';
+    if (!sel || !text || sel.rangeCount === 0 || text.split(' ').length > LOOKUP_MAX_WORDS) return this.hideLookup();
+    const srcOf = (n: Node | null) => (n instanceof Element ? n : n?.parentElement)?.closest<HTMLElement>('.src') ?? null;
+    const src = srcOf(sel.anchorNode);
+    if (!src || src !== srcOf(sel.focusNode)) return this.hideLookup();
+    const row = src.closest<HTMLElement>('.row');
+    const line = row ? this.shown?.[Number(row.dataset.i)] : undefined;
+    if (!line) return this.hideLookup();
+
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    this.pendingPick = { text, line, rect };
+    clearTimeout(this.clickTimer);
+    const box = this.panel.getBoundingClientRect();
+    this.lookupBtn.hidden = false;
+    const bw = this.lookupBtn.offsetWidth;
+    const left = Math.min(Math.max(4, rect.left + rect.width / 2 - bw / 2 - box.left), box.width - bw - 4);
+    const top = rect.top - box.top - this.lookupBtn.offsetHeight - 6;
+    this.lookupBtn.style.left = `${left}px`;
+    this.lookupBtn.style.top = `${top < 44 ? rect.bottom - box.top + 6 : top}px`;
+  }
+
+  private hideLookup(): void {
+    this.lookupBtn.hidden = true;
+    this.pendingPick = null;
   }
 
   private setQuery(raw: string): void {

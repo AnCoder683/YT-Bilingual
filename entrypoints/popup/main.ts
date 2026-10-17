@@ -1,6 +1,7 @@
 import { sendToBackground, type TestKeyResponse } from '@/src/messages';
 import { API_KEY_STORAGE, DISPLAY_MODES, loadSettings, MODELS, saveSettings, TARGET_LANGS, type Settings } from '@/src/settings';
 import { budgetError, loadUsage } from '@/src/translate/usage';
+import { loadVocab } from '@/src/vocab';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -95,6 +96,10 @@ async function init() {
     await testKey();
   };
   $('testKey').onclick = testKey;
+
+  $('openVocab').onclick = () => void browser.tabs.create({ url: browser.runtime.getURL('/vocab.html') });
+  const vocab = await loadVocab();
+  $('vocabCount').textContent = vocab.length ? `(${vocab.length})` : '';
 
   const u = await loadUsage();
   $('monthUsd').textContent = usd(u.monthUsd);
