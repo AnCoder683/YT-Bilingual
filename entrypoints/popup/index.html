@@ -46,9 +46,26 @@
       <input type="range" id="fontScale" min="0.7" max="1.6" step="0.1" />
     </section>
 
+    <section>
+      <label class="row switch">
+        <input type="checkbox" id="shortcuts" />
+        <span>Phím tắt theo câu</span>
+      </label>
+      <p class="hint"><kbd>A</kbd> câu trước · <kbd>D</kbd> câu sau · <kbd>S</kbd> nghe lại câu</p>
+      <label class="row switch">
+        <input type="checkbox" id="autoPause" />
+        <span>Tự dừng sau mỗi câu</span>
+      </label>
+      <p class="hint">Bấm <kbd>K</kbd>/Space để nghe tiếp, <kbd>S</kbd> để nghe lại.</p>
+    </section>
+
     <section class="usage">
       <div><span>Tháng này</span><b id="monthUsd">$0</b></div>
+      <progress id="budgetBar" max="1" value="0" hidden></progress>
+      <p id="budgetStatus" class="status" hidden></p>
       <div><span>Tổng</span><b id="totalUsd">$0</b></div>
+      <label for="budget">Giới hạn mỗi tháng (USD, 0 = không giới hạn)</label>
+      <input type="number" id="budget" min="0" step="0.5" inputmode="decimal" />
       <p class="hint">Ước tính theo số token thật API trả về. Số chính xác xem ở platform.claude.com → Usage.</p>
     </section>
 

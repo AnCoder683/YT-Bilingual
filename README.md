@@ -7,6 +7,8 @@ Extension cho Brave / Chrome / Edge, hiển thị **phụ đề song ngữ trên
 - Câu nào dịch xong hiện ngay, không phải chờ dịch hết video.
 - Bản dịch được cache trong trình duyệt, nên xem lại không tốn thêm tiền.
 - Chọn được model (Haiku / Sonnet / Opus 5.5), ngôn ngữ đích, chế độ hiển thị (song ngữ / chỉ bản dịch / chỉ bản gốc) và cỡ chữ.
+- Luyện nghe: phím tắt theo câu và chế độ tự dừng sau mỗi câu.
+- Đặt được giới hạn chi tiêu mỗi tháng.
 
 Cần **Claude API key của riêng bạn**, lấy tại [platform.claude.com](https://platform.claude.com) → Khóa API. Với Haiku 5.5, chi phí khoảng $0,06 cho mỗi giờ video.
 
@@ -40,7 +42,21 @@ Trên máy đã build, chạy `npm run zip` để tạo `.output/yt-bilingual-<v
 2. Chọn model, ngôn ngữ đích, cách hiển thị và cỡ chữ.
 3. Mở video YouTube và **bật phụ đề CC** (phím `c`). Bước này bắt buộc, vì extension dùng chính phụ đề mà YouTube tải về khi bật CC.
 
+### Phím tắt theo câu
+
+| Phím | Tác dụng |
+|---|---|
+| `A` | Về câu trước (đang ở khoảng lặng thì nghe lại câu vừa nói) |
+| `D` | Sang câu sau |
+| `S` | Nghe lại câu hiện tại |
+
+Bật **Tự dừng sau mỗi câu** trong popup để video dừng ở cuối mỗi câu; bấm `K`/Space để nghe tiếp. Phím tắt không chạy khi đang gõ chữ (ô tìm kiếm, bình luận) và có thể tắt trong popup.
+
+### Chi phí và ngân sách
+
 Popup hiển thị chi phí ước tính của tháng này và tổng chi phí. Số chính xác xem ở platform.claude.com → Chi phí (cập nhật trễ vài giờ).
+
+Đặt **Giới hạn mỗi tháng** (USD, `0` = không giới hạn) để extension ngừng gọi API khi chạm mức; từ 80% popup sẽ cảnh báo. Bản dịch đã có trong cache vẫn xem được. Các đoạn đang dịch dở vẫn chạy xong nên có thể vượt mức một chút.
 
 ## Cập nhật
 
@@ -73,6 +89,7 @@ Cấu trúc chính:
 | `entrypoints/content.ts`, `src/controller.ts` | Nhận transcript, đồng bộ với video, điều khiển overlay |
 | `src/transcript/` | Tách từ và chia câu tạm (heuristic) |
 | `src/translate/chunks.ts` | Chia transcript thành đoạn khoảng 40 giây để gửi Claude |
+| `src/nav.ts` | Phím tắt theo câu, tự dừng sau mỗi câu |
 | `src/scheduler.ts` | Lịch dịch (đoạn đang xem + dịch trước), ghép ngữ cảnh, hiện dần |
 | `src/translate/` | Prompt, gọi Claude (streaming), cache, chi phí |
 | `entrypoints/background.ts` | Service worker: giữ key, gọi API, cache |

@@ -38,10 +38,16 @@ type ChunkState =
   | { status: 'idle' }
   | { status: 'pending' }
   | { status: 'done' }
-  | { status: 'error'; retryAt: number; message: string };
+  | { status: 'error'; retryAt: number; message: string }
+  /** Chạm ngân sách: không thử lại, nhưng đoạn sau vẫn được hỏi (có thể có sẵn trong cache). */
+  | { status: 'blocked'; message: string };
 
 /** Trạng thái đoạn đang xem, để báo cho người xem khi chưa có bản dịch. */
-export type ChunkStatus = { kind: 'pending' } | { kind: 'error'; message: string } | null;
+export type ChunkStatus =
+  | { kind: 'pending' }
+  | { kind: 'error'; message: string }
+  | { kind: 'blocked'; message: string }
+  | null;
 
 // reqId → Translator đang chờ request đó; content script chuyển PartialMessage vào đây.
 const partialHandlers = new Map<string, (subs: SubtitleOut[]) => void>();
@@ -102,6 +108,7 @@ export class Translator {
     const st = this.states[chunkAt(this.chunks, tMs)];
     if (st?.status === 'pending') return { kind: 'pending' };
     if (st?.status === 'error') return { kind: 'error', message: st.message };
+    if (st?.status === 'blocked') return { kind: 'blocked', message: st.message };
     return null;
   }
 
@@ -118,7 +125,8 @@ export class Translator {
     for (let c = this.wantFrom; c < end && this.inFlight < MAX_IN_FLIGHT; c++) {
       const st = this.states[c]!;
       const ready = st.status === 'idle' || (st.status === 'error' && now >= st.retryAt);
-      if (ready && (c === this.wantFrom || this.states[c - 1]!.status === 'done')) void this.run(c);
+      const prev = this.states[c - 1]?.status;
+      if (ready && (c === this.wantFrom || prev === 'done' || prev === 'blocked')) void this.run(c);
     }
   }
 
@@ -175,6 +183,8 @@ export class Translator {
       this.apply(c, res.result);
       this.costUsd += res.costUsd;
       this.states[c] = { status: 'done' };
+    } else if (res.error === 'budget') {
+      this.states[c] = { status: 'blocked', message: res.message };
     } else if (FATAL.has(res.error)) {
       this.fatal = { kind: res.error, message: res.message };
       this.states[c] = { status: 'idle' };

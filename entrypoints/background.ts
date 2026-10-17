@@ -11,7 +11,7 @@ import { API_KEY_STORAGE, loadSettings } from '@/src/settings';
 import { cacheGet, cacheKey, cachePut } from '@/src/translate/cache';
 import { testKey, TranslateError, translateChunk } from '@/src/translate/claude';
 import { PROMPT_VERSION, type PromptInput } from '@/src/translate/prompt';
-import { addUsage } from '@/src/translate/usage';
+import { addUsage, budgetError, loadUsage } from '@/src/translate/usage';
 
 const MAX_CONCURRENT = 3;
 let running = 0;
@@ -34,13 +34,17 @@ async function getApiKey(): Promise<string | null> {
 }
 
 async function handleTranslate(req: TranslateRequest, tab?: { tabId: number; frameId: number }): Promise<TranslateResponse> {
-  const { model } = await loadSettings();
+  const { model, monthlyBudgetUsd } = await loadSettings();
   const key = cacheKey(req.track, req.targetLang, model, PROMPT_VERSION);
   const hit = (await cacheGet(key))[req.chunkKey];
   if (hit) return { ok: true, result: hit, costUsd: 0, cached: true };
 
   const apiKey = await getApiKey();
   if (!apiKey) return { ok: false, error: 'no_key', message: 'Chưa có API key — mở popup YT Bilingual để nhập.' };
+  // Bản dịch trong cache vẫn xem được; chỉ chặn request mới. Các request đang
+  // chạy dở vẫn hoàn tất nên có thể vượt ngân sách một chút.
+  const over = budgetError((await loadUsage()).monthUsd, monthlyBudgetUsd);
+  if (over) return { ok: false, error: 'budget', message: over };
 
   const base = {
     title: req.title,

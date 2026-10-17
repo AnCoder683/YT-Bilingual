@@ -34,13 +34,13 @@ Xem video nước ngoài với phụ đề dịch tự động thường gặp m
 
 ## 3. Ý tưởng phát triển
 
-Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp / Vừa / Cao) để dễ chọn làm trước.
+Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp / Vừa / Cao) để dễ chọn làm trước. ✅ là đã làm.
 
 ### 3.1 Học ngoại ngữ (giá trị cao nhất cho người học)
 
 | Ý tưởng | Mô tả | Giá trị | Công sức |
 |---|---|---|---|
-| Phím tắt theo câu | `A`/`D` lùi hoặc tiến một câu, `S` lặp lại câu hiện tại, tự dừng sau mỗi câu | Cao | Thấp |
+| ✅ Phím tắt theo câu | `A`/`D` lùi hoặc tiến một câu, `S` lặp lại câu hiện tại, tự dừng sau mỗi câu | Cao | Thấp |
 | Bấm vào từ để tra | Bấm một từ trong dòng gốc → nghĩa theo đúng ngữ cảnh câu (hỏi Claude), phiên âm | Cao | Vừa |
 | Sổ từ vựng | Lưu từ hoặc câu kèm mốc thời gian video; xuất sang Anki/CSV | Cao | Vừa |
 | Giải thích thành ngữ, tiếng lóng | Câu có idiom thì hiện biểu tượng 💡, rê chuột để xem giải thích | Vừa | Vừa |
@@ -68,7 +68,7 @@ Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp
 
 | Ý tưởng | Mô tả | Giá trị | Công sức |
 |---|---|---|---|
-| Giới hạn ngân sách | Đặt mức tối đa mỗi tháng; gần chạm thì cảnh báo, chạm thì dừng | Cao | Thấp |
+| ✅ Giới hạn ngân sách | Đặt mức tối đa mỗi tháng; gần chạm thì cảnh báo, chạm thì dừng | Cao | Thấp |
 | Dịch trước cả playlist / "Xem sau" | Dịch nền bằng Message Batches API (rẻ hơn khoảng 50%) để xem là có ngay | Vừa | Vừa |
 | Dọn cache tự động | Xóa bản dịch của video lâu không xem, giới hạn dung lượng | Thấp | Thấp |
 | Đồng bộ cài đặt | Đồng bộ cài đặt (không gồm key) giữa các máy qua `chrome.storage.sync` | Thấp | Thấp |
@@ -91,7 +91,7 @@ Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp
 
 ## 4. Gợi ý thứ tự làm tiếp
 
-1. **Phím tắt theo câu + giới hạn ngân sách:** công sức thấp, dùng hằng ngày được ngay.
+1. ✅ **Phím tắt theo câu + giới hạn ngân sách:** đã xong.
 2. **Bảng transcript song ngữ + xuất `.srt`:** tận dụng dữ liệu đã có sẵn trong cache.
 3. **Glossary theo kênh + bấm vào từ để tra:** nâng chất lượng dịch và giá trị học tập.
 4. **Phát hành Chrome Web Store / Firefox:** khi đã dùng ổn định một thời gian.

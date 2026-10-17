@@ -37,3 +37,9 @@ export function addUsage(videoId: string, usd: number): Promise<void> {
   });
   return chain;
 }
+
+/** Thông báo khi chi tiêu tháng này đã chạm ngân sách (0 = không giới hạn), hoặc null. */
+export function budgetError(monthUsd: number, budgetUsd: number): string | null {
+  if (!(budgetUsd > 0) || monthUsd < budgetUsd) return null;
+  return `Đã chạm giới hạn ngân sách tháng ($${budgetUsd.toFixed(2)}) — tăng giới hạn trong popup YT Bilingual.`;
+}

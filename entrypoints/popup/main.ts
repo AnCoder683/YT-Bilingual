@@ -1,6 +1,6 @@
 import { sendToBackground, type TestKeyResponse } from '@/src/messages';
 import { API_KEY_STORAGE, DISPLAY_MODES, loadSettings, MODELS, saveSettings, TARGET_LANGS, type Settings } from '@/src/settings';
-import { loadUsage } from '@/src/translate/usage';
+import { budgetError, loadUsage } from '@/src/translate/usage';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -13,6 +13,11 @@ const altTargetLang = $<HTMLSelectElement>('altTargetLang');
 const display = $<HTMLSelectElement>('display');
 const fontScale = $<HTMLInputElement>('fontScale');
 const fontScaleValue = $<HTMLSpanElement>('fontScaleValue');
+const shortcuts = $<HTMLInputElement>('shortcuts');
+const autoPause = $<HTMLInputElement>('autoPause');
+const budget = $<HTMLInputElement>('budget');
+const budgetBar = $<HTMLProgressElement>('budgetBar');
+const budgetStatus = $<HTMLParagraphElement>('budgetStatus');
 
 function fill(select: HTMLSelectElement, items: readonly { value: string; label: string }[]) {
   select.replaceChildren(...items.map((i) => new Option(i.label, i.value)));
@@ -41,6 +46,9 @@ async function init() {
   fontScale.value = String(settings.fontScale);
   const showScale = () => (fontScaleValue.textContent = `${Math.round(Number(fontScale.value) * 100)}%`);
   showScale();
+  shortcuts.checked = settings.shortcuts;
+  autoPause.checked = settings.autoPause;
+  budget.value = String(settings.monthlyBudgetUsd);
 
   const stored = (await browser.storage.local.get(API_KEY_STORAGE))[API_KEY_STORAGE];
   if (typeof stored === 'string' && stored) {
@@ -61,6 +69,14 @@ async function init() {
   display.onchange = () => persist({ display: display.value as Settings['display'] });
   fontScale.oninput = showScale;
   fontScale.onchange = () => persist({ fontScale: Number(fontScale.value) });
+  shortcuts.onchange = () => persist({ shortcuts: shortcuts.checked });
+  autoPause.onchange = () => persist({ autoPause: autoPause.checked });
+  budget.onchange = async () => {
+    const v = Math.max(0, Number(budget.value) || 0);
+    budget.value = String(v);
+    await persist({ monthlyBudgetUsd: v });
+    showBudget(u.monthUsd, v);
+  };
 
   $('toggleKey').onclick = () => {
     apiKey.type = apiKey.type === 'password' ? 'text' : 'password';
@@ -80,6 +96,23 @@ async function init() {
   const u = await loadUsage();
   $('monthUsd').textContent = usd(u.monthUsd);
   $('totalUsd').textContent = usd(u.totalUsd);
+  showBudget(u.monthUsd, settings.monthlyBudgetUsd);
+}
+
+/** Thanh tiến độ ngân sách; từ 80% thì đổi màu cảnh báo. */
+function showBudget(monthUsd: number, limit: number) {
+  const on = limit > 0;
+  budgetBar.hidden = budgetStatus.hidden = !on;
+  if (!on) return;
+  const pct = Math.round((monthUsd / limit) * 100);
+  const warn = pct >= 80;
+  budgetBar.value = Math.min(1, monthUsd / limit);
+  budgetBar.classList.toggle('warn', warn);
+  const over = budgetError(monthUsd, limit);
+  budgetStatus.textContent = over
+    ? 'Đã chạm giới hạn: tạm ngừng dịch mới (bản đã dịch vẫn xem được).'
+    : `${pct}% của $${limit}${warn ? ' — sắp chạm giới hạn' : ''}`;
+  budgetStatus.className = `status ${warn ? 'err' : ''}`;
 }
 
 async function testKey() {

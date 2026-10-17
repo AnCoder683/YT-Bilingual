@@ -41,6 +41,12 @@ export interface Settings {
   display: DisplayMode;
   /** Hệ số cỡ chữ so với mặc định (theo chiều cao player). */
   fontScale: number;
+  /** Phím A/D/S: lùi / tiến / nghe lại một câu. */
+  shortcuts: boolean;
+  /** Tự dừng video sau mỗi câu (luyện nghe). */
+  autoPause: boolean;
+  /** Chi tối đa mỗi tháng (USD, theo ước tính trong popup); 0 = không giới hạn. */
+  monthlyBudgetUsd: number;
 }
 
 export type DisplayMode = 'both' | 'target' | 'source';
@@ -58,6 +64,9 @@ export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   display: 'both',
   fontScale: 1,
+  shortcuts: true,
+  autoPause: false,
+  monthlyBudgetUsd: 0,
 };
 
 /** Đổi các trường này thì phải dịch lại; các trường khác chỉ đổi cách hiển thị. */

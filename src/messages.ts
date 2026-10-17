@@ -63,7 +63,7 @@ export type TranslateResponse =
   | { ok: true; result: ChunkResult; costUsd: number; cached: boolean }
   | { ok: false; error: ErrorKind; message: string };
 
-export type ErrorKind = 'no_key' | 'auth' | 'credit' | 'rate_limit' | 'refusal' | 'network' | 'bad_output' | 'other';
+export type ErrorKind = 'no_key' | 'auth' | 'credit' | 'budget' | 'rate_limit' | 'refusal' | 'network' | 'bad_output' | 'other';
 
 export interface TestKeyRequest {
   type: 'test_key';

@@ -261,4 +261,24 @@ describe('Translator', () => {
     tr.ensureAround(tr.chunks.at(-1)!.startMs);
     expect(send.mock.calls.length).toBe(n);
   });
+
+  it('chạm ngân sách: đoạn đó không thử lại, đoạn sau vẫn hỏi (có thể có trong cache)', async () => {
+    vi.resetModules();
+    const calls: TranslateRequest[] = [];
+    const ok = fakeSend([]);
+    const send = vi.fn(async (req: TranslateRequest) => {
+      calls.push(req);
+      return calls.length === 1 ? { ok: false, error: 'budget', message: 'Hết ngân sách' } : ok(req);
+    });
+    vi.doMock('@/src/messages', () => ({ sendToBackground: send }));
+    const { Translator } = await import('@/src/scheduler');
+    const tr = new Translator(info, fakeAsr(100), 'vi', () => '', () => {});
+    tr.ensureAround(0);
+    await vi.waitFor(() => expect(calls.length).toBe(3));
+    expect(tr.fatal).toBeNull();
+    expect(tr.statusAt(0)).toEqual({ kind: 'blocked', message: 'Hết ngân sách' });
+    expect(tr.statusAt(tr.chunks[1]!.startMs)).toBeNull();
+    tr.ensureAround(0);
+    expect(calls.length).toBe(3);
+  });
 });
