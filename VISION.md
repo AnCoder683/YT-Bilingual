@@ -50,7 +50,7 @@ Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp
 
 | Ý tưởng | Mô tả | Giá trị | Công sức |
 |---|---|---|---|
-| Bảng transcript song ngữ | Panel bên cạnh video: toàn bộ câu gốc và câu dịch, tự cuộn theo video, bấm vào câu để tua, tìm kiếm được | Cao | Vừa |
+| ✅ Bảng transcript song ngữ | Panel bên cạnh video: toàn bộ câu gốc và câu dịch, tự cuộn theo video, bấm vào câu để tua, tìm kiếm được | Cao | Vừa |
 | Xuất phụ đề | Tải về file `.srt`/`.vtt` song ngữ, hoặc Markdown để đọc lại | Vừa | Thấp |
 | Tóm tắt và hỏi đáp video | Tóm tắt theo chương; hỏi Claude "đoạn này nói gì?" kèm mốc thời gian | Vừa | Vừa |
 
@@ -92,6 +92,6 @@ Mỗi ý tưởng có ước lượng **giá trị** và **công sức** (Thấp
 ## 4. Gợi ý thứ tự làm tiếp
 
 1. ✅ **Phím tắt theo câu + giới hạn ngân sách:** đã xong.
-2. **Bảng transcript song ngữ + xuất `.srt`:** tận dụng dữ liệu đã có sẵn trong cache.
+2. ✅ **Bảng transcript song ngữ** (đã xong). Xuất file để sau, làm chung với sổ từ vựng / Anki.
 3. **Glossary theo kênh + bấm vào từ để tra:** nâng chất lượng dịch và giá trị học tập.
 4. **Phát hành Chrome Web Store / Firefox:** khi đã dùng ổn định một thời gian.

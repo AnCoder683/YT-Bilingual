@@ -13,6 +13,7 @@ const altTargetLang = $<HTMLSelectElement>('altTargetLang');
 const display = $<HTMLSelectElement>('display');
 const fontScale = $<HTMLInputElement>('fontScale');
 const fontScaleValue = $<HTMLSpanElement>('fontScaleValue');
+const panel = $<HTMLInputElement>('panel');
 const shortcuts = $<HTMLInputElement>('shortcuts');
 const autoPause = $<HTMLInputElement>('autoPause');
 const budget = $<HTMLInputElement>('budget');
@@ -46,6 +47,7 @@ async function init() {
   fontScale.value = String(settings.fontScale);
   const showScale = () => (fontScaleValue.textContent = `${Math.round(Number(fontScale.value) * 100)}%`);
   showScale();
+  panel.checked = settings.panel;
   shortcuts.checked = settings.shortcuts;
   autoPause.checked = settings.autoPause;
   budget.value = String(settings.monthlyBudgetUsd);
@@ -69,6 +71,7 @@ async function init() {
   display.onchange = () => persist({ display: display.value as Settings['display'] });
   fontScale.oninput = showScale;
   fontScale.onchange = () => persist({ fontScale: Number(fontScale.value) });
+  panel.onchange = () => persist({ panel: panel.checked });
   shortcuts.onchange = () => persist({ shortcuts: shortcuts.checked });
   autoPause.onchange = () => persist({ autoPause: autoPause.checked });
   budget.onchange = async () => {

@@ -23,6 +23,8 @@ const STYLE = `
 }
 :host-context(.ytp-autohide) .wrap { bottom: 4%; }
 :host-context(.ytp-fullscreen:not(.ytp-autohide)) .wrap { bottom: 96px; }
+/* Bảng transcript đang phủ bên phải (toàn màn hình): phụ đề né sang trái. */
+:host-context(.yt-bilingual-panel-open) .wrap { right: calc(min(34%, 460px) + 12px); }
 .box {
   max-width: 84%;
   padding: 0.15em 0.5em;

@@ -45,6 +45,8 @@ export interface Settings {
   shortcuts: boolean;
   /** Tự dừng video sau mỗi câu (luyện nghe). */
   autoPause: boolean;
+  /** Bảng transcript song ngữ cạnh video. */
+  panel: boolean;
   /** Chi tối đa mỗi tháng (USD, theo ước tính trong popup); 0 = không giới hạn. */
   monthlyBudgetUsd: number;
 }
@@ -66,6 +68,7 @@ export const DEFAULT_SETTINGS: Settings = {
   fontScale: 1,
   shortcuts: true,
   autoPause: false,
+  panel: true,
   monthlyBudgetUsd: 0,
 };
 

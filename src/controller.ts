@@ -1,6 +1,7 @@
-import { AutoPause, navTarget, PAUSED_LOOKAHEAD_MS, type NavDir } from './nav';
+import { AutoPause, LEAD_MS, navTarget, PAUSED_LOOKAHEAD_MS, type NavDir } from './nav';
 import { findActive } from './overlay/active';
 import { Overlay, type Notice } from './overlay/overlay';
+import { TranscriptPanel } from './panel/panel';
 import { heuristicLines, Translator, type DisplayLine } from './scheduler';
 import { loadSettings, needsRetranslate, onSettingsChanged, pickTarget, type Settings } from './settings';
 import { trackKey, type TimedtextInfo } from './timedtext';
@@ -55,10 +56,15 @@ export class Controller {
    * từ nó (video có thể dừng trễ vài chục ms, khi đó thời gian đã sang câu sau).
    */
   private pin: number | null = null;
+  private panel = new TranscriptPanel((ms) => this.seekTo(ms));
+  private layoutObserver: MutationObserver | null = null;
 
   constructor() {
     document.addEventListener('yt-navigate-finish', () => this.onNavigate());
     document.addEventListener('keydown', (e) => this.onKey(e), true);
+    // Đổi bố cục (cửa sổ hẹp ↔ rộng, toàn màn hình) khi video đang dừng: đặt lại bảng.
+    window.addEventListener('resize', () => this.tick());
+    document.addEventListener('fullscreenchange', () => this.tick());
     void loadSettings().then((s) => {
       this.settings = s;
       this.overlay.setOptions(s.display, s.fontScale);
@@ -109,6 +115,7 @@ export class Controller {
       this.transcript = null;
       this.translator = null;
       this.overlay.setEnabled(false);
+      this.panel.hide();
     }
   }
 
@@ -128,6 +135,13 @@ export class Controller {
         video.addEventListener(ev, () => this.tick());
       }
       this.video = video;
+    }
+
+    const flexy = document.querySelector('ytd-watch-flexy');
+    if (flexy && !this.layoutObserver) {
+      // Rạp hát / một cột / hai cột: YouTube đổi thuộc tính trên ytd-watch-flexy.
+      this.layoutObserver = new MutationObserver(() => this.tick());
+      this.layoutObserver.observe(flexy, { attributes: true, attributeFilter: ['theater', 'is-two-columns_', 'fullscreen'] });
     }
 
     if (player !== this.player) {
@@ -154,13 +168,28 @@ export class Controller {
     return this.translator ? this.translator.lines() : transcript.plain;
   }
 
-  /** Phím A / D / S: lùi, tiến, nghe lại một câu. */
+  /** Bấm vào câu trong bảng transcript: tua tới đầu câu và phát. */
+  private seekTo(startMs: number): void {
+    const video = this.video;
+    if (!video) return;
+    video.currentTime = Math.max(0, startMs - LEAD_MS) / 1000;
+    if (video.paused) void video.play();
+  }
+
+  /** Phím A / D / S: lùi, tiến, nghe lại một câu; Q: bật/tắt bảng transcript. */
   private onKey(e: KeyboardEvent): void {
     const dir = NAV_KEYS[e.code];
     const { transcript, video, player } = this;
-    if (!dir || !this.settings?.shortcuts || !transcript || !video || !player) return;
+    if (!(dir || e.code === 'KeyQ') || !this.settings?.shortcuts || !transcript || !video || !player) return;
     if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.repeat || isTyping(e)) return;
     if (!this.isOurs(transcript, player)) return;
+    if (!dir) {
+      if (!this.settings.panel) return;
+      e.preventDefault();
+      e.stopPropagation();
+      this.panel.toggle();
+      return this.tick();
+    }
     const tMs = video.paused && this.pin !== null ? this.pin : video.currentTime * 1000;
     const to = navTarget(this.lines(transcript), tMs, dir);
     if (to === null) return;
@@ -193,9 +222,13 @@ export class Controller {
     this.overlay.setEnabled(showing);
 
     const tMs = video.currentTime * 1000;
+    const panelOn = ours && !!this.settings?.panel;
+    this.panel.attach(player, panelOn);
+    // Tắt CC vẫn xem được bảng: vẫn dịch đoạn đang xem.
+    if (showing || panelOn) this.translator?.ensureAround(tMs);
+    if (panelOn) this.panel.update(this.lines(transcript), tMs);
     if (showing) {
       const tr = this.translator;
-      tr?.ensureAround(tMs);
       const lines = this.lines(transcript);
       const tShow = !video.paused ? tMs : (this.pin ?? tMs + PAUSED_LOOKAHEAD_MS);
       const line = lines[findActive(lines, tShow)] ?? null;

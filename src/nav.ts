@@ -19,7 +19,7 @@ const JUMP_MS = 500;
 export type NavDir = 'prev' | 'next' | 'repeat';
 
 /** Chỉ số câu cuối cùng đã bắt đầu tại tMs, hoặc -1. */
-function lastStarted(lines: readonly Timed[], tMs: number): number {
+export function lastStarted(lines: readonly Timed[], tMs: number): number {
   let lo = 0;
   let hi = lines.length - 1;
   let idx = -1;
