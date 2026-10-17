@@ -1,13 +1,13 @@
 import type { ChunkResult, ContextLine, GlossaryEntry, SubtitleOut } from '../messages';
 
 /** Tăng khi đổi prompt/schema để cache cũ không bị dùng lại. */
-export const PROMPT_VERSION = 3;
+export const PROMPT_VERSION = 4;
 
 // Giữ cố định (không chèn biến) để prompt caching dùng lại được.
 export const SYSTEM_PROMPT = `You translate video subtitles, one chunk of the video at a time.
 
 The user message is a JSON object:
-- "source_lang", "target_lang": BCP-47 language codes.
+- "source_lang", "target_lang": BCP-47 language codes; "target_language" names the target language in English.
 - "transcript": "auto" for automatic speech recognition, "human" for human-made captions.
 - "video_title": the video's title, for context.
 - "story_so_far": short summaries of earlier chunks, oldest first (may be empty).
@@ -22,6 +22,7 @@ How to split into subtitles:
 - In "source" for a "human" transcript, copy the words and punctuation exactly as given; only decide where each subtitle ends.
 
 How to translate:
+- Write every "text" entirely in target_lang. This holds even when source_lang is close to or the same family as target_lang: never return text in source_lang, and never just tidy up or paraphrase the source in its own language.
 - Write the way a professional subtitler would for native speakers: natural spoken language, not word-for-word, and concise.
 - Use the title, story so far, glossary and neighbouring subtitles to work out who is speaking to whom, pronouns, gender, tense and terminology, and keep these consistent. When target_lang is Vietnamese, pick forms of address (tôi/mình/anh/chị/em/bạn...) that fit the speakers' relationship and keep them stable across chunks.
 - Automatic transcripts contain mishearings. Infer what was actually said and translate that meaning rather than the literal mistake.
@@ -78,10 +79,20 @@ export interface PromptInput {
   storySoFar: string;
 }
 
+/** "en" → "English", "zh-Hans" → "Simplified Chinese"; mã lạ thì giữ nguyên. */
+export function languageName(code: string): string {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 export function buildUserMessage(p: PromptInput): string {
   return JSON.stringify({
     source_lang: p.sourceLang,
     target_lang: p.targetLang,
+    target_language: languageName(p.targetLang),
     transcript: p.asr ? 'auto' : 'human',
     video_title: p.title,
     story_so_far: p.storySoFar,

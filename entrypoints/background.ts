@@ -99,7 +99,7 @@ async function handleTranslate(req: TranslateRequest, tab?: { tabId: number; fra
   await cachePut(key, { [req.chunkKey]: result });
   await addUsage(req.videoId, cost);
   console.log(
-    `[yt-bilingual] dịch đoạn ${req.words.length} từ → ${result.subtitles.length} phụ đề, $${cost.toFixed(5)}, model ${model}`,
+    `[yt-bilingual] dịch đoạn ${req.words.length} từ (${req.sourceLang} → ${req.targetLang}) → ${result.subtitles.length} phụ đề, $${cost.toFixed(5)}, model ${model}`,
   );
   return { ok: true, result, costUsd: cost, cached: false };
 }

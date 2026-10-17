@@ -102,6 +102,13 @@ describe('prompt', () => {
     expect(msg.words).toBe('[0]so [1]today');
     expect(msg.context_before).toEqual([{ source: 'a', translation: 'b' }]);
   });
+  it('kèm tên ngôn ngữ đích', () => {
+    const msg = (targetLang: string) =>
+      JSON.parse(buildUserMessage({ title: 'T', sourceLang: 'vi', targetLang, asr: true, words: ['a'], contextBefore: [], contextAfter: [], glossary: [], storySoFar: '' }));
+    expect(msg('en')).toMatchObject({ source_lang: 'vi', target_lang: 'en', target_language: 'English' });
+    expect(msg('vi').target_language).toBe('Vietnamese');
+    expect(msg('zh-Hans').target_language).toMatch(/Chinese/);
+  });
 });
 
 describe('costUsd', () => {
