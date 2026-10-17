@@ -28,7 +28,7 @@ function fill(select: HTMLSelectElement, items: readonly { value: string; label:
   select.replaceChildren(...items.map((i) => new Option(i.label, i.value)));
 }
 
-function setStatus(text: string, kind: 'ok' | 'err' | '' = '') {
+function setStatus(text: string, kind: 'ok' | 'warn' | 'err' | '' = '') {
   keyStatus.textContent = text;
   keyStatus.className = `status ${kind}`;
 }
@@ -150,6 +150,7 @@ async function init() {
   if (typeof stored === 'string' && stored) {
     keyTail = stored.slice(-4);
     apiKey.placeholder = `Đã lưu: …${keyTail}`;
+    $('clearKey').hidden = false;
   } else {
     setStatus('Dán key vào ô trên rồi bấm Lưu key.', 'err');
   }
@@ -187,25 +188,8 @@ async function init() {
     await showStorage({ type: 'storage_stats' });
   };
 
-  // Bấm hai lần để xóa (popup không nên dùng confirm()).
-  let armed: ReturnType<typeof setTimeout> | undefined;
-  const label = clearCache.textContent;
-  clearCache.onclick = async () => {
-    if (!armed) {
-      clearCache.textContent = 'Bấm lần nữa để xóa';
-      clearCache.classList.add('armed');
-      armed = setTimeout(disarm, 3000);
-      return;
-    }
-    disarm();
-    await showStorage({ type: 'storage_clear' });
-  };
-  function disarm() {
-    clearTimeout(armed);
-    armed = undefined;
-    clearCache.textContent = label;
-    clearCache.classList.remove('armed');
-  }
+  twoClick(clearCache, () => showStorage({ type: 'storage_clear' }));
+  twoClick($('clearKey'), removeKey, 'Bấm lại để xóa');
 
   $('toggleKey').onclick = () => {
     apiKey.type = apiKey.type === 'password' ? 'text' : 'password';
@@ -214,15 +198,17 @@ async function init() {
   $('saveKey').onclick = async () => {
     const key = apiKey.value.trim();
     if (!key) return setStatus('Dán key vào ô trên trước đã.', 'err');
-    if (!key.startsWith('sk-ant-')) return setStatus('Key Claude bắt đầu bằng "sk-ant-".', 'err');
+    // Không chặn key lạ: định dạng key có thể đổi, để máy chủ Anthropic quyết định (bước Kiểm tra).
+    const odd = !key.startsWith('sk-ant-');
     await browser.storage.local.set({ [API_KEY_STORAGE]: key });
     apiKey.value = '';
     keyTail = key.slice(-4);
     apiKey.placeholder = `Đã lưu: …${keyTail}`;
+    $('clearKey').hidden = false;
     refreshSummaries();
-    await testKey();
+    await testKey(odd);
   };
-  $('testKey').onclick = testKey;
+  $('testKey').onclick = () => testKey();
 
   $('openVocab').onclick = () => void browser.tabs.create({ url: browser.runtime.getURL('/vocab.html') });
   $('costTile').onclick = () => openSection('chi');
@@ -234,6 +220,39 @@ async function init() {
   $('totalUsd').textContent = usd(u.totalUsd);
   showBudget(u.monthUsd, settings.monthlyBudgetUsd);
   await showStorage({ type: 'storage_stats' });
+}
+
+/** Bấm hai lần trong 3 giây mới chạy `action` (popup không nên dùng confirm()). */
+function twoClick(btn: HTMLElement, action: () => unknown, armedText = 'Bấm lần nữa để xóa') {
+  const label = btn.textContent;
+  let armed: ReturnType<typeof setTimeout> | undefined;
+  const disarm = () => {
+    clearTimeout(armed);
+    armed = undefined;
+    btn.textContent = label;
+    btn.classList.remove('armed');
+  };
+  btn.onclick = async () => {
+    if (!armed) {
+      btn.textContent = armedText;
+      btn.classList.add('armed');
+      armed = setTimeout(disarm, 3000);
+      return;
+    }
+    disarm();
+    await action();
+  };
+}
+
+/** Xóa key khỏi trình duyệt: các tab YouTube ngừng gọi API, bản dịch trong cache vẫn xem được. */
+async function removeKey() {
+  await browser.storage.local.remove(API_KEY_STORAGE);
+  keyTail = '';
+  apiKey.value = '';
+  apiKey.placeholder = 'sk-ant-...';
+  $('clearKey').hidden = true;
+  setStatus('Đã xóa key khỏi trình duyệt này.', 'ok');
+  refreshSummaries();
 }
 
 /** storage.local của extension giới hạn 10 MB (sổ từ vựng nằm ở đây). */
@@ -289,12 +308,14 @@ function showBudget(month: number, limit: number) {
   budgetStatus.className = `status ${warn ? 'err' : ''}`;
 }
 
-async function testKey() {
-  setStatus('Đang kiểm tra…');
+/** `odd`: key không bắt đầu bằng "sk-ant-" (vẫn lưu, chỉ nhắc). */
+async function testKey(odd = false) {
+  const ODD = 'Key này không giống key Claude (thường bắt đầu bằng "sk-ant-")';
+  setStatus(odd ? `${ODD}, đang kiểm tra…` : 'Đang kiểm tra…', odd ? 'warn' : '');
   const res = await sendToBackground<TestKeyResponse>({ type: 'test_key' });
   if (res.ok) setStatus('✓ Key hợp lệ (kiểm tra miễn phí, không tốn token).', 'ok');
   else {
-    setStatus(res.message, 'err');
+    setStatus(odd && res.error !== 'network' ? `${res.message} ${ODD}.` : res.message, 'err');
     if (res.error !== 'network') setSum('sumKey', '✗ Key lỗi', true);
   }
 }

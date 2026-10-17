@@ -192,7 +192,7 @@ Popup gọn, không phải cuộn:
 | Học | `Bảng · Phím tắt` | Công tắc: bảng transcript, phím tắt `A` `D` `S` `Q`, tự dừng sau mỗi câu |
 | Chi phí | `Không giới hạn` / `$0.40 / $2` | Tháng này, tổng, giới hạn mỗi tháng |
 | Bộ nhớ | `3 KB` | Dung lượng, tự xóa video không mở sau N ngày, xóa cache |
-| API key | `✓ …abcd` / `Chưa có key` | Lưu key, **Kiểm tra** (miễn phí, không tốn token) |
+| API key | `✓ …abcd` / `Chưa có key` | Lưu key (dán key mới để thay key cũ), **Kiểm tra** (miễn phí, không tốn token), **Xóa key** khỏi trình duyệt (bấm hai lần) |
 
 Thay đổi có hiệu lực ngay, không cần tải lại trang. Đổi model, ngôn ngữ hay key thì dịch lại; đổi cách hiển thị thì giữ bản dịch đã có.
 

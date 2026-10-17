@@ -10,6 +10,7 @@
   --on-accent: #fff;
   --ok: #15803d;
   --err: #b91c1c;
+  --warn: #a16207;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -23,6 +24,7 @@
     --on-accent: #1a1a1a;
     --ok: #4ade80;
     --err: #f87171;
+    --warn: #facc15;
   }
 }
 * { box-sizing: border-box; }
@@ -141,6 +143,7 @@ input[type='password'], input[type='text'], input[type='number'], select {
 }
 .inline { display: flex; gap: 6px; }
 .inline input { flex: 1; min-width: 0; }
+.inline button { white-space: nowrap; }
 .inline-field { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 13px; }
 .inline-field input { width: 76px; }
 .inline-field select { width: auto; }
@@ -174,12 +177,15 @@ button.icon { display: inline-flex; align-items: center; padding: 0 9px; }
 button.wide { width: 100%; }
 #saveKey { font-weight: 600; }
 #clearCache { margin-top: 4px; }
-#clearCache.armed { border-color: var(--err); color: var(--err); }
+#clearCache.armed, #clearKey.armed { border-color: var(--err); color: var(--err); }
+button.danger { color: var(--err); }
+button[hidden] { display: none; }
 
 .status { margin: 0; }
 .status:empty { display: none; }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--err); }
+.status.warn { color: var(--warn); }
 .hint { color: var(--muted); font-size: 12px; margin: 2px 0 0; }
 kbd {
   padding: 0 4px;
