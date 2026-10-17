@@ -57,7 +57,8 @@ function item(e: VocabEntry): HTMLElement {
     await refresh();
   };
   const body = el('div', 'body');
-  body.append(head, el('div', 'meaning', e.meaning), el('div', 'def', e.definition));
+  body.append(head, el('div', 'meaning', e.meaning));
+  if (e.definition) body.append(el('div', 'def', e.definition));
   if (e.note) body.append(el('div', 'note', e.note));
   body.append(sentence(e));
   if (e.translation) body.append(el('div', 'translation', e.translation));

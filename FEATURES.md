@@ -104,7 +104,7 @@ Bảng chứa toàn bộ câu của video, mỗi câu có bản gốc và bản 
 - Video **tự dừng** và một ô hiện ra, giải nghĩa **theo đúng câu đang nghe** chứ không phải nghĩa chung chung của từ điển:
   - dạng gốc của từ (ví dụ "burned out" → "burn out"), phiên âm IPA, loại từ;
   - **nghĩa tiếng Việt** trong câu này;
-  - **định nghĩa tiếng Anh** ngắn;
+  - **định nghĩa tiếng Anh** ngắn (chỉ khi video là tiếng Anh; video tiếng khác thì thẻ chỉ dùng ngôn ngữ "Dịch sang");
   - ghi chú cách dùng nếu có (tiếng lóng, văn phong, nghĩa khác hay gặp);
   - câu gốc với chữ đã chọn được in đậm.
 - Nút **＋ Lưu vào sổ** và **↺ Nghe lại câu** (tua về đầu câu và phát).

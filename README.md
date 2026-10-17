@@ -65,7 +65,7 @@ Bảng toàn bộ câu gốc + bản dịch, tự cuộn theo video, tự đặt
 
 ### Tra từ và sổ từ vựng
 
-- **Bấm vào một từ** trên dòng câu gốc của phụ đề, hoặc **nhấn giữ rồi kéo** qua nhiều từ để chọn cả cụm ("burn out"). Video tự dừng và một ô hiện ra với nghĩa **theo đúng câu đang nghe**: phiên âm, loại từ, nghĩa tiếng Việt, định nghĩa tiếng Anh ngắn.
+- **Bấm vào một từ** trên dòng câu gốc của phụ đề, hoặc **nhấn giữ rồi kéo** qua nhiều từ để chọn cả cụm ("burn out"). Video tự dừng và một ô hiện ra với nghĩa **theo đúng câu đang nghe**: phiên âm, loại từ, nghĩa tiếng Việt, định nghĩa tiếng Anh ngắn (khi video là tiếng Anh).
 - Trong bảng transcript: **bôi đen** (kéo chuột hoặc nhấp đúp vào từ) rồi bấm nút **Tra**.
 - **＋ Lưu vào sổ** để lưu từ cùng câu gốc, bản dịch và mốc thời gian trong video. **↺ Nghe lại câu** để tua về đầu câu.
 - Đóng ô bằng `Esc`, nút ✕ hoặc bấm ra ngoài: video tự phát tiếp nếu chính extension đã dừng nó.

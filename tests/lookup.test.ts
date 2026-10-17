@@ -34,7 +34,10 @@ describe('tra từ: prompt và kết quả', () => {
     const m = JSON.parse(
       buildLookupMessage({ picked: 'burned out', sentence: "I'm burned out.", translation: 'Tôi kiệt sức.', title: 'T', sourceLang: 'en', targetLang: 'vi' }),
     );
-    expect(m).toMatchObject({ picked: 'burned out', sentence: "I'm burned out.", sentence_translation: 'Tôi kiệt sức.', target_lang: 'vi' });
+    expect(m).toMatchObject({ picked: 'burned out', sentence: "I'm burned out.", sentence_translation: 'Tôi kiệt sức.' });
+    expect(m.reminder).toBe('meaning and note in Vietnamese; definition in English.');
+    const vi = JSON.parse(buildLookupMessage({ picked: 'phần chính', sentence: 'vào phần chính', translation: '', title: '', sourceLang: 'vi', targetLang: 'es' }));
+    expect(vi.reminder).toBe('meaning and note in Spanish; definition "".');
   });
 
   it('parseLookup: thiếu term thì dùng chữ đã chọn; không có nghĩa thì lỗi', () => {
@@ -42,6 +45,10 @@ describe('tra từ: prompt và kết quả', () => {
     expect(r).toEqual({ term: 'burned out', ipa: '/x/', pos: 'verb', meaning: 'kiệt sức', definition: 'tired', note: '' });
     expect(() => parseLookup(JSON.stringify({ term: 'a', meaning: '', definition: '' }), 'a')).toThrow();
     expect(() => parseLookup('không phải JSON', 'a')).toThrow();
+    // Video không phải tiếng Anh: bỏ dòng định nghĩa dù model có trả.
+    const vi = parseLookup(JSON.stringify({ term: 'phần chính', meaning: 'la parte principal', definition: 'main part', note: '' }), 'phần chính', 'vi');
+    expect(vi.definition).toBe('');
+    expect(parseLookup(JSON.stringify({ term: 'kid', meaning: 'đứa trẻ', definition: 'a child' }), 'kids', 'en-GB').definition).toBe('a child');
   });
 });
 

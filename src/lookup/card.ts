@@ -195,6 +195,7 @@ export class LookupCard {
     this.pos.textContent = r.pos;
     this.meaning.textContent = r.meaning;
     this.def.textContent = r.definition;
+    this.def.hidden = !r.definition;
     this.note.textContent = r.note;
     this.note.hidden = !r.note;
     this.status.hidden = true;

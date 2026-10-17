@@ -1,19 +1,20 @@
 import type { LookupRequest, LookupResult } from '../messages';
+import { languageName } from './prompt';
 
-export const LOOKUP_VERSION = 2;
+export const LOOKUP_VERSION = 5;
 
 export const LOOKUP_SYSTEM = `You are a concise dictionary for language learners watching videos.
-The user picked a word or phrase from a subtitle sentence. Explain what it means IN THAT SENTENCE.
+Explain the picked word or phrase as used IN THE GIVEN SENTENCE. Follow "reminder" for output languages.
 
 Fields:
-- term: dictionary form of the picked text ("burned out" -> "burn out", "kids" -> "kid"). If the picked text is part of a phrasal verb or idiom in this sentence, give the whole expression.
-- ipa: IPA pronunciation of term in its usual accent for the source language (e.g. General American for English), between slashes. Empty string if not meaningful.
-- pos: part of speech in English, short (noun, verb, adjective, adverb, phrasal verb, idiom, ...).
-- meaning: meaning in this sentence, written in target_lang, short (at most ~12 words). Natural wording a learner would remember.
-- definition: short English definition (at most ~15 words), learner-dictionary style.
-- note: optional usage note (register, slang, common collocation, a different common meaning). At most ~20 words. Empty string if nothing useful.
+- term: dictionary form ("burned out" -> "burn out", "kids" -> "kid"); the whole phrasal verb or idiom if the pick is part of one.
+- ipa: IPA in the source language's usual accent (General American for English), between slashes; "" if not meaningful.
+- pos: short English label (noun, verb, phrasal verb, idiom, ...).
+- meaning: meaning in this sentence, at most ~12 words, natural wording a learner would remember.
+- note: optional usage note (register, slang, collocation, another common meaning), at most ~20 words; "" if nothing useful.
+- definition: learner-dictionary English definition, at most ~15 words.
 
-Language: meaning and note MUST be written in target_lang (e.g. Vietnamese when target_lang is "vi"), never in English unless target_lang is English. Only definition is always English.`;
+meaning and note never use English unless that is the requested language; quoting the source words is fine.`;
 
 export const LOOKUP_SCHEMA = {
   type: 'object',
@@ -22,28 +23,35 @@ export const LOOKUP_SCHEMA = {
     ipa: { type: 'string' },
     pos: { type: 'string' },
     meaning: { type: 'string' },
-    definition: { type: 'string' },
     note: { type: 'string' },
+    definition: { type: 'string' },
   },
-  required: ['term', 'ipa', 'pos', 'meaning', 'definition', 'note'],
+  required: ['term', 'ipa', 'pos', 'meaning', 'note', 'definition'],
   additionalProperties: false,
 } as const;
 
 export type LookupInput = Omit<LookupRequest, 'type' | 'videoId'>;
 
+/** Dòng định nghĩa tiếng Anh chỉ có khi video là tiếng Anh. */
+export function hasDefinition(sourceLang: string): boolean {
+  return sourceLang.toLowerCase().split('-')[0] === 'en';
+}
+
 export function buildLookupMessage(i: LookupInput): string {
+  const lang = languageName(i.targetLang);
+  const def = hasDefinition(i.sourceLang) ? 'definition in English' : 'definition ""';
   return JSON.stringify({
     picked: i.picked,
     sentence: i.sentence,
     sentence_translation: i.translation || undefined,
     video_title: i.title || undefined,
     source_lang: i.sourceLang,
-    target_lang: i.targetLang,
+    reminder: `meaning and note in ${lang}; ${def}.`,
   });
 }
 
 /** Đọc JSON Claude trả; thiếu nghĩa thì báo lỗi. */
-export function parseLookup(raw: string, picked: string): LookupResult {
+export function parseLookup(raw: string, picked: string, sourceLang = 'en'): LookupResult {
   const o = JSON.parse(raw) as Partial<Record<keyof LookupResult, unknown>>;
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
   const r: LookupResult = {
@@ -51,7 +59,7 @@ export function parseLookup(raw: string, picked: string): LookupResult {
     ipa: str(o.ipa),
     pos: str(o.pos),
     meaning: str(o.meaning),
-    definition: str(o.definition),
+    definition: hasDefinition(sourceLang) ? str(o.definition) : '',
     note: str(o.note),
   };
   if (!r.meaning && !r.definition) throw new Error('thiếu nghĩa');

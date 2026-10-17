@@ -110,7 +110,7 @@ export async function lookupTerm(apiKey: string, model: string, input: LookupInp
     if (res.stop_reason === 'refusal') throw new TranslateError('refusal', 'Claude từ chối tra từ này.', cost);
     const text = res.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
     try {
-      return { result: parseLookup(text, input.picked), costUsd: cost };
+      return { result: parseLookup(text, input.picked, input.sourceLang), costUsd: cost };
     } catch {
       throw new TranslateError('bad_output', 'Claude trả về kết quả tra từ không hợp lệ.', cost);
     }
