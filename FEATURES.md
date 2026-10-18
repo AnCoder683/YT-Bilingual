@@ -54,6 +54,7 @@ Mỗi lần dịch, extension gửi cho Claude một **đoạn khoảng 120–18
 - **Dịch trước 2 đoạn tiếp theo**, nên khi xem liền mạch gần như không phải đợi.
 - Đoạn sau chỉ chạy khi đoạn trước đã xong, để nhận được glossary và tóm tắt mới nhất.
 - **Chỉ trả tiền cho phần bạn thật sự xem.** Extension không tự dịch cả video.
+- **Chỉ dịch video đang xem:** video mở ở trang `/watch`, hoặc video đó đang phát tiếp trong miniplayer. Lướt trang chủ / tìm kiếm / Shorts, kể cả khi YouTube tự phát xem trước lúc rê chuột lên thumbnail, không tốn tiền.
 
 ## 4. Cache: xem lại không tốn tiền
 

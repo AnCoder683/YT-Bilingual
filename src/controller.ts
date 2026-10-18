@@ -9,6 +9,7 @@ import { loadSettings, needsRetranslate, onSettingsChanged, pickTarget, type Set
 import { trackKey, type TimedtextInfo } from './timedtext';
 import type { Transcript as Parsed } from './transcript';
 import { addVocab, hasVocab } from './vocab';
+import { watchedVideo, watchVideoId } from './watching';
 
 interface Transcript {
   info: TimedtextInfo;
@@ -27,7 +28,12 @@ function videoTitle(): string {
 
 /** Video đang xem theo URL; ngoài trang /watch (miniplayer) thì null. */
 function urlVideoId(): string | null {
-  return location.pathname === '/watch' ? new URLSearchParams(location.search).get('v') : null;
+  return watchVideoId(location);
+}
+
+/** Player chính đang nằm trong miniplayer (YouTube chuyển hẳn phần tử sang đó). */
+function inMiniplayer(player: Element | null): boolean {
+  return !!player?.closest('ytd-miniplayer');
 }
 
 const NAV_KEYS: Record<string, NavDir> = { KeyA: 'prev', KeyD: 'next', KeyS: 'repeat' };
@@ -116,8 +122,11 @@ export class Controller {
 
   /** Track mới nhất của video hiện tại thắng (người dùng vừa đổi track). */
   setTranscript(info: TimedtextInfo, parsed: Parsed): void {
-    const current = urlVideoId();
-    if (current && info.videoId !== current) return;
+    // Chỉ nhận phụ đề của video đang xem: bỏ phụ đề của player xem trước
+    // (rê chuột lên thumbnail ở trang chủ / tìm kiếm), nếu không sẽ tốn tiền dịch.
+    const miniplayer = inMiniplayer(document.querySelector('#movie_player'));
+    const watched = watchedVideo(urlVideoId(), miniplayer, this.transcript?.info.videoId ?? null);
+    if (!info.videoId || info.videoId !== watched) return;
     // Player tải lại đúng track cũ: giữ bộ dịch (và bản dịch đã có).
     const prev = this.transcript;
     if (prev && trackKey(prev.info) === trackKey(info) && prev.parsed.tokens.length === parsed.tokens.length) return;
@@ -182,9 +191,13 @@ export class Controller {
     }
   }
 
-  /** Video đang phát đúng là video của transcript và không phải quảng cáo. */
+  /**
+   * Video đang phát đúng là video của transcript và không phải quảng cáo; rời
+   * trang /watch thì chỉ khi miniplayer phát tiếp.
+   */
   private isOurs(transcript: Transcript, player: HTMLElement): boolean {
-    return !player.classList.contains('ad-showing') && (urlVideoId() ?? transcript.info.videoId) === transcript.info.videoId;
+    const { videoId } = transcript.info;
+    return !player.classList.contains('ad-showing') && watchedVideo(urlVideoId(), inMiniplayer(player), videoId) === videoId;
   }
 
   private lines(transcript: Transcript): readonly DisplayLine[] {
